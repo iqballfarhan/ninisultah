@@ -11,12 +11,26 @@ body{
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
   display:flex;align-items:center;justify-content:center;padding:24px;
 }
-.wrap{max-width:760px;width:100%;text-align:center}
+.wrap{max-width:760px;width:100%;text-align:center;transition:opacity .45s ease,transform .45s ease}
+.intro-overlay{position:fixed;inset:0;z-index:20;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease,visibility .45s ease}
+.intro-card{background:var(--card);border-radius:18px;padding:24px 20px;max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.7)}
+.intro-cake{font-size:4rem;line-height:1;cursor:pointer;transform-origin:center;transition:transform .2s ease}
+.intro-cake:hover{transform:scale(1.05)}
+.intro-title{margin:0;color:#333}
+.intro-subtitle{margin:0;color:#444}
+.intro-signature{margin:0;color:#333;font-weight:600;letter-spacing:.2px;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
+.intro-signature.show{opacity:1;transform:none}
+body.has-intro .wrap{opacity:0;transform:translateY(14px);pointer-events:none}
+body.entered .wrap{opacity:1;transform:none;pointer-events:auto}
+body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .title{font-size:2.2rem;margin:0 0 8px;color:#333}
 .subtitle{margin:0 0 18px;color:#444}
 .card{background:var(--card);border-radius:16px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.08);border:1px solid rgba(255,255,255,0.6)}
-.photo-grid{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;justify-items:center}
-.photo{width:100%;max-width:320px;height:300px;border-radius:14px;object-fit:contain;object-position:center;display:block;box-shadow:0 8px 18px rgba(0,0,0,0.12);border:3px solid rgba(255,255,255,0.85);background:rgba(255,255,255,0.65)}
+.slider{width:100%;display:flex;align-items:center;justify-content:center;gap:10px}
+.photo-frame{width:min(100%,420px);height:320px;border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,0.12);border:3px solid rgba(255,255,255,0.85);background:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.photo{width:100%;height:100%;object-fit:contain;object-position:center;display:none}
+.photo.is-active{display:block}
+.slide-btn{background:var(--accent);border:0;color:white;width:38px;height:38px;border-radius:999px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .text{font-weight:600;color:#222;text-align:center;max-width:320px}
 .controls{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
 .btn{background:var(--accent);border:0;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
@@ -25,4 +39,4 @@ body{
 .hint{margin-top:12px;color:#333a;font-size:0.9rem}
 .confetti-canvas{position:fixed;left:0;top:0;pointer-events:none;width:100%;height:100%;}
 
-@media (max-width:480px){.title{font-size:1.5rem}.photo-grid{grid-template-columns:1fr}.photo{height:260px}}
+@media (max-width:480px){.title{font-size:1.5rem}.photo-frame{height:260px}.slide-btn{width:34px;height:34px}.intro-cake{font-size:3.4rem}}

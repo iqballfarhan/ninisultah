@@ -2,14 +2,21 @@
 
 This is a small, minimal static website to wish a happy birthday. It uses a small synthesized backsound (generated with Web Audio API) so no copyrighted audio files are included.
 
-Cara menjalankan (Docker Compose):
+Cara menjalankan (Docker Compose - langsung clone dari GitHub):
 
 ```bash
-# di folder proyek (yang berisi docker-compose.yml)
-docker compose up --build
+# cukup jalankan
+docker compose up -d
 
 # lalu buka http://localhost:8080
 ```
+
+`docker-compose.yml` sekarang akan:
+- clone repo dari `https://github.com/iqballfarhan/ninisultah.git` (branch `main`) saat container start;
+- menyalin hasil clone ke web root Nginx;
+- langsung serve di port `8080`.
+
+Jika ingin ganti repo/branch, ubah `REPO_URL` dan `REPO_BRANCH` di `docker-compose.yml`.
 
 Pengaturan & catatan:
 - Tekan tombol "Play Music" pada halaman untuk memulai backsound (dibutuhkan interaksi pengguna di beberapa browser).

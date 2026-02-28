@@ -143,8 +143,102 @@ function runConfetti(){
   setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,w,h); }, 6000);
 }
 
+function setupPhotoSlider(){
+  const slides = Array.from(document.querySelectorAll('.photo-frame .photo'));
+  const prevBtn = document.getElementById('prevSlide');
+  const nextBtn = document.getElementById('nextSlide');
+  if (!slides.length || !prevBtn || !nextBtn) return;
+
+  let currentIndex = 0;
+  let autoSlideTimer = null;
+
+  function showSlide(index){
+    slides.forEach((slide, i)=>{
+      slide.classList.toggle('is-active', i === index);
+    });
+  }
+
+  function nextSlide(){
+    currentIndex = (currentIndex + 1) % slides.length;
+    showSlide(currentIndex);
+  }
+
+  function prevSlide(){
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    showSlide(currentIndex);
+  }
+
+  function restartAutoSlide(){
+    if (autoSlideTimer) clearInterval(autoSlideTimer);
+    autoSlideTimer = setInterval(()=>{
+      nextSlide();
+    }, 3000);
+  }
+
+  prevBtn.addEventListener('click', ()=>{
+    prevSlide();
+    restartAutoSlide();
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    nextSlide();
+    restartAutoSlide();
+  });
+
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.hidden){
+      if (autoSlideTimer) clearInterval(autoSlideTimer);
+      autoSlideTimer = null;
+      return;
+    }
+    restartAutoSlide();
+  });
+
+  showSlide(currentIndex);
+  restartAutoSlide();
+}
+
+function setupIntroGate(){
+  const gate = document.getElementById('introGate');
+  const cake = gate && gate.querySelector('.intro-cake');
+  const subtitle = gate && gate.querySelector('.intro-subtitle');
+  const signature = document.getElementById('introSignature');
+  if (!gate || !cake) return;
+
+  const INTRO_STEP = {
+    REVEAL_MESSAGE: 0,
+    ENTER_PAGE: 1,
+  };
+  let currentStep = INTRO_STEP.REVEAL_MESSAGE;
+
+  const enterPage = ()=>{
+    document.body.classList.remove('has-intro');
+    document.body.classList.add('entered');
+    setTimeout(()=>{
+      gate.remove();
+    }, 500);
+  };
+
+  cake.addEventListener('click', ()=>{
+    if (currentStep === INTRO_STEP.REVEAL_MESSAGE){
+      currentStep = INTRO_STEP.ENTER_PAGE;
+      if (signature){
+        signature.hidden = false;
+        requestAnimationFrame(()=> signature.classList.add('show'));
+      }
+      if (subtitle) subtitle.textContent = 'Sekali lagi klik kuenya untuk masuk 💖';
+      return;
+    }
+    enterPage();
+    startMusic();
+    runConfetti();
+  });
+}
+
 // wire UI
 document.addEventListener('DOMContentLoaded', ()=>{
+  setupIntroGate();
+  setupPhotoSlider();
   document.getElementById('playBtn').addEventListener('click', ()=>{
     // user gesture required to start audio on many browsers
     startMusic();

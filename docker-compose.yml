@@ -1,7 +1,19 @@
-version: '3.8'
 services:
   web:
-    build: .
+    image: nginx:alpine
     ports:
       - "8080:80"
+    environment:
+      REPO_URL: https://github.com/iqballfarhan/ninisultah.git
+      REPO_BRANCH: main
+    command: >
+      /bin/sh -c "
+      set -e;
+      apk add --no-cache git;
+      rm -rf /usr/share/nginx/html/*;
+      git clone --depth=1 --branch \"$${REPO_BRANCH}\" \"$${REPO_URL}\" /tmp/repo;
+      cp -a /tmp/repo/. /usr/share/nginx/html/;
+      rm -rf /tmp/repo;
+      nginx -g 'daemon off;'
+      "
     restart: unless-stopped

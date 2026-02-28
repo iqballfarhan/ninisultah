@@ -6,15 +6,42 @@
   <title>Selamat Ulang Tahun, Sayang!</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="has-intro">
+  <div id="introGate" class="intro-overlay" role="dialog" aria-label="Pembuka ulang tahun">
+    <div class="intro-card">
+      <div class="intro-cake" aria-hidden="true">🎂</div>
+      <h2 class="intro-title">Ada kejutan kecil buat kamu</h2>
+      <p class="intro-subtitle">Klik kuenya 2x yaa ✨</p>
+      <p id="introSignature" class="intro-signature" hidden>from iqballfarhan</p>
+    </div>
+  </div>
   <main class="wrap">
     <h1 class="title">Selamat Ulang Tahun, Sayang! 🎂</h1>
     <p class="subtitle">Hari ini istimewa karena kamu. Semoga bahagia selalu. Aku sayang kamu ❤️</p>
 
     <div class="card">
-      <div class="photo-grid">
-        <img class="photo" src="assets/ninis1.jpeg" alt="Foto pacarku 1" loading="eager" decoding="async">
-        <img class="photo" src="assets/ninis2.png" alt="Foto pacarku 2" loading="lazy" decoding="async">
+      <div class="slider" id="photoSlider">
+        <button id="prevSlide" class="slide-btn" aria-label="Foto sebelumnya">◀</button>
+        <div class="photo-frame">
+          <img class="photo is-active" src="assets/ninis0.jpg" alt="Foto pacarku 0" loading="eager" decoding="async">
+          <img class="photo" src="assets/ninis1.jpeg" alt="Foto pacarku 1" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis2.png" alt="Foto pacarku 2" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis3.jpg" alt="Foto pacarku 3" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis4.jpg" alt="Foto pacarku 4" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis5.jpg" alt="Foto pacarku 5" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis6.jpg" alt="Foto pacarku 6" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis7.jpg" alt="Foto pacarku 7" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis8.jpg" alt="Foto pacarku 8" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis9.jpg" alt="Foto pacarku 9" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis10.jpg" alt="Foto pacarku 10" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis11.jpg" alt="Foto pacarku 11" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis12.jpg" alt="Foto pacarku 12" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis13.jpg" alt="Foto pacarku 13" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis14.jpg" alt="Foto pacarku 14" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis15.jpg" alt="Foto pacarku 15" loading="lazy" decoding="async">
+          <img class="photo" src="assets/ninis16.jpg" alt="Foto pacarku 16" loading="lazy" decoding="async">
+        </div>
+        <button id="nextSlide" class="slide-btn" aria-label="Foto berikutnya">▶</button>
       </div>
       <div class="text">Untukmu, dengan cinta.</div>
     </div>
