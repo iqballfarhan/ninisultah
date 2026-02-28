@@ -318,30 +318,95 @@ function setupPhotoModal(){
   });
 }
 
+function setupPageLoader(){
+  const loader = document.getElementById('pageLoader');
+  const loaderBar = document.getElementById('loaderBar');
+  const loaderPercent = document.getElementById('loaderPercent');
+  if (!loader || !loaderBar || !loaderPercent){
+    document.body.classList.add('loaded');
+    return Promise.resolve();
+  }
+
+  const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo, .end-photo'));
+  const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
+  const total = imageUrls.length || 1;
+  let completed = 0;
+  const startedAt = performance.now();
+  const minimumDuration = 1200;
+
+  const updateProgress = ()=>{
+    const percent = Math.min(100, Math.round((completed / total) * 100));
+    loaderBar.style.width = `${percent}%`;
+    loaderPercent.textContent = `${percent}%`;
+  };
+
+  const loadImage = (url)=> new Promise((resolve)=>{
+    let done = false;
+    const finish = ()=>{
+      if (done) return;
+      done = true;
+      completed += 1;
+      updateProgress();
+      resolve();
+    };
+
+    const image = new Image();
+    image.onload = finish;
+    image.onerror = finish;
+    image.src = url;
+    if (image.complete) finish();
+    setTimeout(finish, 5000);
+  });
+
+  updateProgress();
+
+  const allReady = imageUrls.length ? Promise.all(imageUrls.map(loadImage)) : Promise.resolve().then(()=>{
+    completed = 1;
+    updateProgress();
+  });
+
+  return allReady.then(()=>{
+    completed = total;
+    updateProgress();
+    const elapsed = performance.now() - startedAt;
+    const remaining = Math.max(0, minimumDuration - elapsed);
+    return new Promise((resolve)=>{
+      setTimeout(()=>{
+        loader.classList.add('is-done');
+        document.body.classList.add('loaded');
+        setTimeout(()=>{
+          loader.remove();
+          resolve();
+        }, 460);
+      }, remaining);
+    });
+  });
+}
+
 // wire UI
 document.addEventListener('DOMContentLoaded', ()=>{
-  setupIntroGate();
-  setupPhotoSlider();
-  setupMemoryGalleryTemplate();
-  setupScrollReveal();
-  setupPhotoModal();
-  document.getElementById('playBtn').addEventListener('click', ()=>{
-    // user gesture required to start audio on many browsers
-    startMusic();
-  });
-  document.getElementById('stopBtn').addEventListener('click', ()=>{
-    stopMusic();
-  });
-  document.getElementById('volume').addEventListener('input', (e)=>{
-    const v = parseFloat(e.target.value);
-    if (masterGain) masterGain.gain.value = v;
-    // If we couldn't connect the media element to the AudioContext, adjust audioElement.volume as a fallback
-    if (audioElement && !audioSourceNode){
-      audioElement.volume = v;
-    }
-  });
-  document.getElementById('confettiBtn').addEventListener('click', ()=> runConfetti());
-  window.addEventListener('resize', ()=>{
-    const c=document.getElementById('confettiCanvas'); c.width=window.innerWidth; c.height=window.innerHeight;
+  setupPageLoader().then(()=>{
+    setupIntroGate();
+    setupPhotoSlider();
+    setupMemoryGalleryTemplate();
+    setupScrollReveal();
+    setupPhotoModal();
+    document.getElementById('playBtn').addEventListener('click', ()=>{
+      startMusic();
+    });
+    document.getElementById('stopBtn').addEventListener('click', ()=>{
+      stopMusic();
+    });
+    document.getElementById('volume').addEventListener('input', (e)=>{
+      const v = parseFloat(e.target.value);
+      if (masterGain) masterGain.gain.value = v;
+      if (audioElement && !audioSourceNode){
+        audioElement.volume = v;
+      }
+    });
+    document.getElementById('confettiBtn').addEventListener('click', ()=> runConfetti());
+    window.addEventListener('resize', ()=>{
+      const c=document.getElementById('confettiCanvas'); c.width=window.innerWidth; c.height=window.innerHeight;
+    });
   });
 });
