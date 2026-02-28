@@ -57,6 +57,7 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .end-photo{width:min(100%,500px);border-radius:16px;border:3px solid rgba(255,255,255,0.85);box-shadow:0 8px 18px rgba(0,0,0,0.12);display:block}
 .controls{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;width:100%}
 .scroll-cue{width:44px;height:44px;border-radius:999px;background:var(--card);border:1px solid rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;color:#333;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,0.08);animation:cue-bounce 1.5s ease-in-out infinite}
+.scroll-cue{align-self:center}
 .scroll-cue-icon{font-size:1.8rem;line-height:1;transform:translateY(-2px)}
 .btn{background:var(--accent);border:0;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
 .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.08);color:#333}
@@ -81,6 +82,7 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 @media (max-width:640px){
   .slider{gap:0}
   .photo-frame{width:100%;height:min(78vw,320px)}
+  .reveal{opacity:1;transform:none}
   #prevSlide,#nextSlide{position:absolute;top:50%;transform:translateY(-50%);z-index:2}
   #prevSlide{left:8px}
   #nextSlide{right:8px}

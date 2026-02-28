@@ -229,15 +229,28 @@ function setupScrollReveal(){
   const revealItems = Array.from(document.querySelectorAll('.reveal'));
   if (!revealItems.length) return;
 
+  const showAll = ()=>{
+    revealItems.forEach((item)=> item.classList.add('is-visible'));
+  };
+
+  if (!('IntersectionObserver' in window)){
+    showAll();
+    return;
+  }
+
   const observer = new IntersectionObserver((entries)=>{
     entries.forEach((entry)=>{
       if (entry.isIntersecting){
         entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.16 });
+  }, { threshold: 0.01, rootMargin: '0px 0px -8% 0px' });
 
   revealItems.forEach((item)=> observer.observe(item));
+
+  // Fallback: if mobile browser delays intersection events, reveal anyway.
+  setTimeout(showAll, 1800);
 }
 
 function setupIntroGate(){
