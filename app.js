@@ -37,20 +37,6 @@ function ensureAudio(){
   }
 }
 
-// Check whether an asset URL exists by performing a HEAD request.
-// If HEAD is not allowed on the server, treat failures as "not found" and fall back.
-async function assetExists(url){
-  if (!url) return false;
-  try{
-    const resp = await fetch(url, { method: 'HEAD' });
-    return resp && resp.ok;
-  }catch(e){
-    // network error or file:// where fetch is not available — treat as not existing
-    console.warn('[audio] assetExists check failed for', url, e);
-    return false;
-  }
-}
-
 function scheduleLoop(){
   if (!audioCtx) return;
   const start = audioCtx.currentTime + 0.05;
@@ -85,33 +71,17 @@ function startMusic(){
   if (audioCtx.state === 'suspended') audioCtx.resume();
   console.log('[audio] startMusic called; audioCtx.state=', audioCtx.state);
   isPlaying = true;
-  // Prefer playing a local MP3 if it exists. Do a quick HEAD check first so we
-  // can deterministically choose file vs synth and update UI.
+  // Prefer playing local MP3 from assets; fall back to synth only if play fails.
   const src = audioElement && audioElement.getAttribute('src');
   if (src){
-    assetExists(src).then((exists)=>{
-      const sourceLabel = document.getElementById('audioSource');
-      if (exists){
-        // play media element
-        sourceLabel && (sourceLabel.textContent = 'Sumber audio: file lokal (assets)');
-        audioElement.play().then(()=>{
-          console.log('[audio] playing media element');
-          document.getElementById('playBtn').textContent = 'Playing...';
-        }).catch((err)=>{
-          console.warn('[audio] media play failed, falling back to synth:', err);
-          sourceLabel && (sourceLabel.textContent = 'Sumber audio: synth (gagal putar file)');
-          scheduleLoop();
-          document.getElementById('playBtn').textContent = 'Playing...';
-        });
-      } else {
-        // fallback to synth
-        sourceLabel && (sourceLabel.textContent = 'Sumber audio: synth (file tidak ditemukan)');
-        scheduleLoop();
-        document.getElementById('playBtn').textContent = 'Playing...';
-      }
-    }).catch((e)=>{
-      console.warn('[audio] assetExists promise rejected, falling back to synth', e);
-      document.getElementById('audioSource') && (document.getElementById('audioSource').textContent = 'Sumber audio: synth (error pengecekan file)');
+    const sourceLabel = document.getElementById('audioSource');
+    sourceLabel && (sourceLabel.textContent = 'Sumber audio: file lokal (assets)');
+    audioElement.play().then(()=>{
+      console.log('[audio] playing media element');
+      document.getElementById('playBtn').textContent = 'Playing...';
+    }).catch((err)=>{
+      console.warn('[audio] media play failed, falling back to synth:', err);
+      sourceLabel && (sourceLabel.textContent = 'Sumber audio: synth (gagal putar file)');
       scheduleLoop();
       document.getElementById('playBtn').textContent = 'Playing...';
     });
