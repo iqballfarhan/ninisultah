@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Selamat Ulang Tahun, Sayang!</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1 class="title">Selamat Ulang Tahun, Sayang! 🎂</h1>
+    <p class="subtitle">Hari ini istimewa karena kamu. Semoga bahagia selalu. Aku sayang kamu ❤️</p>
+
+    <div class="card">
+      <div class="photo">📷</div>
+      <div class="text">Untukmu, dengan cinta.</div>
+    </div>
+
+    <div class="controls">
+      <button id="playBtn" class="btn">Play Music</button>
+      <button id="stopBtn" class="btn btn-ghost">Pause</button>
+      <label class="vol">Volume <input id="volume" type="range" min="0" max="1" step="0.01" value="0.6"></label>
+      <button id="confettiBtn" class="btn">🎉 Confetti</button>
+    </div>
+
+    <div id="audioSource" class="hint">Klik "Play Music" untuk memulai backsound (cek sumber: synth / file lokal).</div>
+
+    <footer class="hint">Klik "Play Music" untuk memulai backsound (diputar sintetis jika file lokal tidak ditemukan).</footer>
+  </main>
+
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <!-- Audio element: update src to match the MP3 filename you placed in assets/ -->
+  <audio id="bgAudio" src="assets/HAPPY BIRTHDAY INSTRUMENTAL (Piano _ Sax - by hsc501).mp3" preload="metadata"></audio>
+
+  <script src="app.js"></script>
+</body>
+</html>
