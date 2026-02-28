@@ -331,13 +331,25 @@ function setupPageLoader(){
   const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
   const total = imageUrls.length || 1;
   let completed = 0;
+  let targetPercent = 0;
+  let displayedPercent = 0;
   const startedAt = performance.now();
-  const minimumDuration = 1200;
+  const minimumDuration = 1000;
 
-  const updateProgress = ()=>{
-    const percent = Math.min(100, Math.round((completed / total) * 100));
-    loaderBar.style.width = `${percent}%`;
-    loaderPercent.textContent = `${percent}%`;
+  const renderProgress = ()=>{
+    loaderBar.style.width = `${displayedPercent}%`;
+    loaderPercent.textContent = `${displayedPercent}%`;
+  };
+
+  const animateProgressTimer = setInterval(()=>{
+    if (displayedPercent < targetPercent){
+      displayedPercent += 1;
+      renderProgress();
+    }
+  }, 15);
+
+  const updateTargetProgress = ()=>{
+    targetPercent = Math.min(100, Math.round((completed / total) * 100));
   };
 
   const loadImage = (url)=> new Promise((resolve)=>{
@@ -346,7 +358,7 @@ function setupPageLoader(){
       if (done) return;
       done = true;
       completed += 1;
-      updateProgress();
+      updateTargetProgress();
       resolve();
     };
 
@@ -358,27 +370,35 @@ function setupPageLoader(){
     setTimeout(finish, 5000);
   });
 
-  updateProgress();
+  targetPercent = 6;
+  renderProgress();
 
   const allReady = imageUrls.length ? Promise.all(imageUrls.map(loadImage)) : Promise.resolve().then(()=>{
     completed = 1;
-    updateProgress();
+    updateTargetProgress();
   });
 
   return allReady.then(()=>{
     completed = total;
-    updateProgress();
+    targetPercent = 100;
     const elapsed = performance.now() - startedAt;
     const remaining = Math.max(0, minimumDuration - elapsed);
     return new Promise((resolve)=>{
-      setTimeout(()=>{
+      const finishLoader = ()=>{
+        if (displayedPercent < 100){
+          setTimeout(finishLoader, 25);
+          return;
+        }
+        clearInterval(animateProgressTimer);
         loader.classList.add('is-done');
         document.body.classList.add('loaded');
         setTimeout(()=>{
           loader.remove();
           resolve();
         }, 460);
-      }, remaining);
+      };
+
+      setTimeout(finishLoader, remaining);
     });
   });
 }

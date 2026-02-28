@@ -80,7 +80,7 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 
 @media (max-width:640px){
   .slider{gap:0}
-  .photo-frame{width:100%;height:min(74vw,320px)}
+  .photo-frame{width:100%;height:min(78vw,320px)}
   #prevSlide,#nextSlide{position:absolute;top:50%;transform:translateY(-50%);z-index:2}
   #prevSlide{left:8px}
   #nextSlide{right:8px}
@@ -91,11 +91,21 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 @media (max-width:480px){
   .slide-btn{width:34px;height:34px}
   .intro-cake{font-size:3.4rem}
+  .card{padding:12px}
+  .text{font-size:.96rem}
   .memory-grid{grid-template-columns:1fr}
   .memory-image{height:240px}
-  .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .controls{display:grid;grid-template-columns:1fr;gap:8px}
   .controls .btn,.controls .btn-ghost{width:100%}
-  .controls .vol{grid-column:1 / -1;justify-content:center}
+  .controls .vol{grid-column:1 / -1;justify-content:center;flex-wrap:wrap}
+  .vol input{width:min(84vw,260px)}
+  .scroll-cue{width:40px;height:40px}
   .photo-modal{padding:14px}
   .photo-modal-image{max-height:82vh}
+}
+
+@media (max-width:360px){
+  .title{font-size:1.45rem}
+  .photo-frame{height:250px}
+  .btn{padding:10px 12px}
 }
