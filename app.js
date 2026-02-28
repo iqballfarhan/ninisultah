@@ -229,6 +229,8 @@ function setupScrollReveal(){
   const revealItems = Array.from(document.querySelectorAll('.reveal'));
   if (!revealItems.length) return;
 
+  document.body.classList.add('js-reveal');
+
   const showAll = ()=>{
     revealItems.forEach((item)=> item.classList.add('is-visible'));
   };
