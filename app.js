@@ -198,6 +198,48 @@ function setupPhotoSlider(){
   restartAutoSlide();
 }
 
+function setupMemoryGalleryTemplate(){
+  const memoryGrid = document.getElementById('memoryGrid');
+  const sliderPhotos = Array.from(document.querySelectorAll('.photo-frame .photo'));
+  if (!memoryGrid || !sliderPhotos.length) return;
+
+  const cards = sliderPhotos.map((img, index)=>{
+    const card = document.createElement('article');
+    card.className = 'memory-card reveal';
+
+    const photo = document.createElement('img');
+    photo.className = 'memory-image';
+    photo.src = img.getAttribute('src') || '';
+    photo.alt = img.getAttribute('alt') || `Foto ${index + 1}`;
+    photo.loading = 'lazy';
+    photo.decoding = 'async';
+
+    const caption = document.createElement('p');
+    caption.className = 'memory-caption';
+    // caption.textContent = ` Ninis ${index + 1}`;
+
+    card.append(photo, caption);
+    return card;
+  });
+
+  memoryGrid.replaceChildren(...cards);
+}
+
+function setupScrollReveal(){
+  const revealItems = Array.from(document.querySelectorAll('.reveal'));
+  if (!revealItems.length) return;
+
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach((entry)=>{
+      if (entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, { threshold: 0.16 });
+
+  revealItems.forEach((item)=> observer.observe(item));
+}
+
 function setupIntroGate(){
   const gate = document.getElementById('introGate');
   const cake = gate && gate.querySelector('.intro-cake');
@@ -235,10 +277,54 @@ function setupIntroGate(){
   });
 }
 
+function setupPhotoModal(){
+  const modal = document.getElementById('photoModal');
+  const modalImage = document.getElementById('photoModalImage');
+  const closeBtn = document.getElementById('photoModalClose');
+  if (!modal || !modalImage || !closeBtn) return;
+
+  const openModal = (src, alt)=>{
+    if (!src) return;
+    modalImage.src = src;
+    modalImage.alt = alt || 'Preview foto';
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+  };
+
+  const closeModal = ()=>{
+    modal.hidden = true;
+    modalImage.removeAttribute('src');
+    document.body.classList.remove('modal-open');
+  };
+
+  document.addEventListener('click', (event)=>{
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const activeSlideImage = target.closest('.photo-frame .photo.is-active');
+    const memoryImage = target.closest('.memory-image');
+    const photoElement = activeSlideImage || memoryImage;
+    if (photoElement instanceof HTMLImageElement){
+      openModal(photoElement.currentSrc || photoElement.src, photoElement.alt);
+    }
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (event)=>{
+    if (event.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (event)=>{
+    if (event.key === 'Escape' && !modal.hidden) closeModal();
+  });
+}
+
 // wire UI
 document.addEventListener('DOMContentLoaded', ()=>{
   setupIntroGate();
   setupPhotoSlider();
+  setupMemoryGalleryTemplate();
+  setupScrollReveal();
+  setupPhotoModal();
   document.getElementById('playBtn').addEventListener('click', ()=>{
     // user gesture required to start audio on many browsers
     startMusic();
