@@ -16,7 +16,9 @@ body{
 body.modal-open{overflow:hidden}
 .page-loader{position:fixed;inset:0;z-index:60;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease,visibility .45s ease}
 .loader-card{width:min(92vw,340px);background:var(--card);border-radius:16px;padding:18px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 10px 24px rgba(0,0,0,0.1);display:flex;flex-direction:column;gap:10px;text-align:center}
-.loader-head{display:flex;align-items:center;justify-content:center;gap:10px}
+.loader-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:2px}
+.loader-icon{width:92px;height:92px;border-radius:999px;object-fit:cover;padding:6px;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.95);box-shadow:0 12px 24px rgba(0,0,0,.14),0 0 0 rgba(255,107,107,0);animation:loader-icon-pop 1.4s ease-in-out infinite}
+.loader-status{display:flex;align-items:center;justify-content:center;gap:10px;max-width:100%}
 .loader-spinner{width:18px;height:18px;border-radius:999px;border:2px solid rgba(0,0,0,0.15);border-top-color:var(--accent);animation:loader-spin .85s linear infinite}
 .loader-title{font-size:1rem;font-weight:700;color:#333}
 .loader-track{height:10px;border-radius:999px;background:rgba(0,0,0,0.08);overflow:hidden;position:relative}
@@ -34,8 +36,8 @@ body.js-reveal .reveal{opacity:0;transform:translateY(24px)}
 body.js-reveal .reveal.is-visible{opacity:1;transform:none}
 .intro-overlay{position:fixed;inset:0;z-index:20;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease,visibility .45s ease}
 .intro-card{background:var(--card);border-radius:18px;padding:24px 20px;max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.7);animation:card-appear .45s ease both}
-.intro-cake{font-size:4rem;line-height:1;cursor:pointer;transform-origin:center;transition:transform .2s ease}
-.intro-cake:hover{transform:scale(1.05)}
+.intro-cake{font-size:4rem;line-height:1;cursor:pointer;transform-origin:center;transition:transform .2s ease;animation:cake-standout 1.9s ease-in-out infinite}
+.intro-cake:hover{transform:scale(1.12);animation-play-state:paused}
 .intro-title{margin:0;color:#333}
 .intro-subtitle{margin:0;color:#444}
 .intro-signature{margin:0;color:#333;font-weight:600;letter-spacing:.2px;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
@@ -58,9 +60,20 @@ body.has-intro .wrap{opacity:0;transform:translateY(14px);pointer-events:none}
 body.entered .wrap{opacity:1;transform:none;pointer-events:auto}
 body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .title{font-size:clamp(1.7rem,4.8vw,2.4rem);margin:0 0 8px;color:#333}
+.title-standout{animation:title-standout 2.2s ease-in-out infinite;transform-origin:center}
 .subtitle{margin:0 auto 18px;color:#444;max-width:95%}
+.subtitle-love{position:relative;display:inline-block;padding:0 34px;font-weight:700;color:#d84a72;animation:subtitle-love-glow 2.1s ease-in-out infinite}
+.subtitle-love::before,.subtitle-love::after{content:'❤';position:absolute;top:50%;font-size:1rem;line-height:1;color:#ff6b8e;opacity:.9;animation:subtitle-love-float 1.8s ease-in-out infinite}
+.subtitle-love::before{left:8px;transform:translateY(-50%)}
+.subtitle-love::after{right:8px;transform:translateY(-50%);animation-delay:.25s}
 .section-title{margin:4px 0 0;color:#333;font-size:1.6rem}
 .section-subtitle{margin:0;color:#444}
+#gallerySection .section-title{position:relative;display:inline-block;align-self:center;padding:0 18px;font-weight:800;animation:gallery-title-glow 2.3s ease-in-out infinite}
+#gallerySection .section-title::before,#gallerySection .section-title::after{content:'✦';position:absolute;top:50%;font-size:.9rem;line-height:1;color:#ff6b8e;animation:gallery-sparkle 1.7s ease-in-out infinite}
+#gallerySection .section-title::before{left:0;transform:translateY(-50%)}
+#gallerySection .section-title::after{right:0;transform:translateY(-50%);animation-delay:.3s}
+#gallerySection .section-subtitle{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 2px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.62);box-shadow:0 4px 12px rgba(0,0,0,.07);font-weight:600;animation:gallery-subtitle-float 2.1s ease-in-out infinite}
+#gallerySection .section-subtitle::after{content:'⌄';font-size:1rem;line-height:1;color:#d84a72;animation:gallery-arrow-bounce 1.2s ease-in-out infinite}
 .card{background:var(--card);border-radius:16px;padding:clamp(12px,2.2vw,18px);display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.08);border:1px solid rgba(255,255,255,0.6);width:100%}
 .slider{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;position:relative}
 .photo-frame{width:min(100%,520px);height:clamp(250px,56vw,340px);border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,0.12);border:3px solid rgba(255,255,255,0.85);background:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -69,6 +82,10 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .photo.is-active,.memory-image{cursor:zoom-in}
 .slide-btn{background:var(--accent);border:0;color:white;width:38px;height:38px;border-radius:999px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .text{font-weight:600;color:#222;text-align:center;max-width:320px}
+.text-standout{position:relative;display:inline-block;padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.62);box-shadow:0 6px 14px rgba(0,0,0,.09);animation:text-standout-glow 2.1s ease-in-out infinite}
+.text-standout::before,.text-standout::after{content:'💖';position:absolute;top:50%;font-size:.92rem;line-height:1;animation:text-love-float 1.7s ease-in-out infinite}
+.text-standout::before{left:-6px;transform:translateY(-50%)}
+.text-standout::after{right:-6px;transform:translateY(-50%);animation-delay:.3s}
 .memory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
 .memory-card{background:var(--card);border-radius:14px;padding:10px;border:1px solid rgba(255,255,255,0.6);box-shadow:0 6px 18px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:8px;text-align:left}
 .memory-image{width:100%;height:clamp(180px,28vw,240px);object-fit:cover;object-position:center;border-radius:10px}
@@ -109,6 +126,11 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
   50%{opacity:1}
 }
 
+@keyframes loader-icon-pop{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-2px) scale(1.05);box-shadow:0 14px 28px rgba(0,0,0,.16),0 0 24px rgba(255,107,107,.5)}
+}
+
 @keyframes card-appear{
   0%{opacity:0;transform:translateY(10px) scale(0.985)}
   100%{opacity:1;transform:translateY(0) scale(1)}
@@ -117,6 +139,57 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 @keyframes ucapan-icon-float{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(-4px)}
+}
+
+@keyframes title-standout{
+  0%,100%{transform:translateY(0) scale(1);text-shadow:0 2px 8px rgba(0,0,0,.05),0 0 0 rgba(255,107,107,0)}
+  50%{transform:translateY(-2px) scale(1.03);text-shadow:0 8px 20px rgba(0,0,0,.12),0 0 20px rgba(255,107,107,.34)}
+}
+
+@keyframes subtitle-love-glow{
+  0%,100%{transform:translateY(0) scale(1);text-shadow:0 1px 6px rgba(216,74,114,.18)}
+  50%{transform:translateY(-1px) scale(1.02);text-shadow:0 6px 18px rgba(216,74,114,.35),0 0 18px rgba(255,107,142,.32)}
+}
+
+@keyframes subtitle-love-float{
+  0%,100%{transform:translateY(-50%) scale(1);opacity:.75}
+  50%{transform:translateY(-65%) scale(1.15);opacity:1}
+}
+
+@keyframes cake-standout{
+  0%,100%{transform:translateY(0) scale(1) rotate(0deg);text-shadow:0 2px 0 rgba(0,0,0,0.03),0 0 0 rgba(255,107,107,0)}
+  35%{transform:translateY(-3px) scale(1.08) rotate(-4deg);text-shadow:0 8px 18px rgba(0,0,0,0.14),0 0 20px rgba(255,107,107,0.42)}
+  65%{transform:translateY(-2px) scale(1.06) rotate(4deg);text-shadow:0 8px 18px rgba(0,0,0,0.13),0 0 20px rgba(255,107,107,0.36)}
+}
+
+@keyframes gallery-title-glow{
+  0%,100%{transform:translateY(0);text-shadow:0 2px 8px rgba(0,0,0,.06),0 0 0 rgba(255,107,142,0)}
+  50%{transform:translateY(-1px);text-shadow:0 8px 18px rgba(0,0,0,.12),0 0 18px rgba(255,107,142,.36)}
+}
+
+@keyframes gallery-sparkle{
+  0%,100%{opacity:.45;transform:translateY(-50%) scale(.9)}
+  50%{opacity:1;transform:translateY(-65%) scale(1.12)}
+}
+
+@keyframes gallery-subtitle-float{
+  0%,100%{transform:translateY(0);box-shadow:0 4px 12px rgba(0,0,0,.07)}
+  50%{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,.11)}
+}
+
+@keyframes gallery-arrow-bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(3px)}
+}
+
+@keyframes text-standout-glow{
+  0%,100%{transform:translateY(0) scale(1);box-shadow:0 6px 14px rgba(0,0,0,.09);text-shadow:0 1px 4px rgba(255,107,142,.15)}
+  50%{transform:translateY(-2px) scale(1.02);box-shadow:0 10px 18px rgba(0,0,0,.12);text-shadow:0 4px 14px rgba(255,107,142,.34)}
+}
+
+@keyframes text-love-float{
+  0%,100%{transform:translateY(-50%) scale(.95);opacity:.78}
+  50%{transform:translateY(-66%) scale(1.12);opacity:1}
 }
 
 @media (max-width:900px){
@@ -144,7 +217,7 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 
 @media (prefers-reduced-motion:reduce){
   .scroll-cue{animation:none}
-  .intro-card,.reveal{transition:none;animation:none}
+  .intro-card,.reveal,.intro-cake,.ucapan-icon,.title-standout,.subtitle-love,.subtitle-love::before,.subtitle-love::after,#gallerySection .section-title,#gallerySection .section-title::before,#gallerySection .section-title::after,#gallerySection .section-subtitle,#gallerySection .section-subtitle::after,.text-standout,.text-standout::before,.text-standout::after{transition:none;animation:none}
   body.js-reveal .reveal{opacity:1;transform:none}
 }
 
