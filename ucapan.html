@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>From Iqbal</title>
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="stylesheet" href="styles.css?v=20260228c">
+</head>
+<body class="loaded">
+  <div class="intro-overlay" role="dialog" aria-label="Ucapan dari Iqbal">
+    <div class="intro-card">
+      <div id="ucapanIcon" class="intro-cake" aria-hidden="true">🎂</div>
+      <h1 class="intro-title">Ucapan dari Iqbal</h1>
+      <p id="ucapanStep" class="intro-subtitle">selamat ulang tahun yah sayang</p>
+      <p id="ucapanProgress" class="hint">1 / 5</p>
+      <button id="nextUcapanBtn" class="btn" type="button" aria-label="Lanjut ke ucapan berikutnya">Next</button>
+      <a href="index.html" class="btn btn-ghost" aria-label="Kembali ke halaman utama">← Kembali</a>
+    </div>
+  </div>
+
+  <script>
+    const ucapanList = [
+      { text: 'selamat ulang tahun yah sayang', icon: '🎂' },
+      { text: 'semoga selalu panjang umurmu', icon: '🎈' },
+      { text: 'selalu sukses dimanapun', icon: '🚀' },
+      { text: 'selalu diberi kelancaran', icon: '🛣️' },
+      { text: 'semoga selalu diberi keberkahan', icon: '✨' }
+    ];
+
+    const ucapanIcon = document.getElementById('ucapanIcon');
+    const ucapanStep = document.getElementById('ucapanStep');
+    const ucapanProgress = document.getElementById('ucapanProgress');
+    const nextUcapanBtn = document.getElementById('nextUcapanBtn');
+    let currentIndex = 0;
+
+    function renderUcapan(){
+      const currentUcapan = ucapanList[currentIndex];
+      ucapanStep.textContent = currentUcapan.text;
+      if (ucapanIcon) ucapanIcon.textContent = currentUcapan.icon;
+      ucapanProgress.textContent = `${currentIndex + 1} / ${ucapanList.length}`;
+      nextUcapanBtn.textContent = currentIndex === ucapanList.length - 1 ? 'Selesai' : 'Next';
+    }
+
+    nextUcapanBtn.addEventListener('click', ()=>{
+      if (currentIndex < ucapanList.length - 1){
+        currentIndex += 1;
+        renderUcapan();
+        return;
+      }
+
+      nextUcapanBtn.disabled = true;
+      nextUcapanBtn.textContent = 'Semua ucapan sudah dibaca 💖';
+      if (ucapanIcon) ucapanIcon.textContent = '💖';
+    });
+
+    renderUcapan();
+  </script>
+</body>
+</html>
