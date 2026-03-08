@@ -511,7 +511,7 @@ function setupPageLoader(){
       return Promise.resolve();
     }
 
-    setLoaderTitle('Menyiapkan audio...');
+    setLoaderTitle('Sabar ya, lagi download resource audio...');
     return fetch(audioUrl, { cache: 'force-cache' })
       .then((res)=>{
         if (!res.ok) throw new Error(`audio fetch failed: ${res.status}`);
@@ -544,10 +544,11 @@ function setupPageLoader(){
   });
 
   targetPercent = 3;
+  setLoaderTitle('Sabar ya, lagi download resource...');
   renderProgress();
 
   const loadImages = ()=>{
-    setLoaderTitle('Mengunduh semua foto...');
+    setLoaderTitle('Sabar ya, lagi download resource foto...');
     if (!imageUrls.length){
       completed = 1;
       updateTargetProgress();
