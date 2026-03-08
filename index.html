@@ -6,16 +6,20 @@
   <title>Ultahnya Ninis</title>
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260308m">
+  <link rel="stylesheet" href="styles.css?v=20260308q">
 </head>
 <body class="has-intro">
   <div id="pageLoader" class="page-loader" role="status" aria-live="polite" aria-label="Memuat halaman">
     <div class="loader-card">
-      <div class="loader-title">Sabar ya, lagi download resource...</div>
+      <div class="loader-head">
+        <span class="loader-spinner" aria-hidden="true"></span>
+        <div class="loader-title">Sabar ya, lagi download resource...</div>
+      </div>
       <div class="loader-track">
         <div id="loaderBar" class="loader-bar"></div>
       </div>
       <div id="loaderPercent" class="loader-percent">0%</div>
+      <div id="loaderData" class="loader-data">0 / 0 resource</div>
     </div>
   </div>
   <div id="introGate" class="intro-overlay" role="dialog" aria-label="Pembuka ulang tahun">
@@ -103,6 +107,6 @@
   <!-- Audio element: update src to match the MP3 filename you placed in assets/ -->
   <audio id="bgAudio" src="assets/HAPPY BIRTHDAY INSTRUMENTAL (Piano _ Sax - by hsc501).mp3" preload="auto"></audio>
 
-  <script src="app.js?v=20260308p"></script>
+  <script src="app.js?v=20260308r"></script>
 </body>
 </html>

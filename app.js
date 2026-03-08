@@ -466,6 +466,7 @@ function setupPageLoader(){
   const loader = document.getElementById('pageLoader');
   const loaderBar = document.getElementById('loaderBar');
   const loaderPercent = document.getElementById('loaderPercent');
+  const loaderData = document.getElementById('loaderData');
   if (!loader || !loaderBar || !loaderPercent){
     document.body.classList.add('loaded');
     return Promise.resolve();
@@ -475,14 +476,18 @@ function setupPageLoader(){
   const setLoaderTitle = (text)=>{
     if (loaderTitle) loaderTitle.textContent = text;
   };
+  const setLoaderData = (loaded, total)=>{
+    if (loaderData) loaderData.textContent = `${loaded} / ${total} resource`;
+  };
 
   const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo, .end-photo'));
   const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
   const audioEl = document.getElementById('bgAudio');
   const audioUrl = audioEl && audioEl.getAttribute('src');
+  const resourceBlobUrls = new Map();
 
-  const total = imageUrls.length || 1;
-  let completed = 0;
+  const totalResources = Math.max(1, imageUrls.length + (audioUrl ? 1 : 0));
+  let loadedResources = 0;
   let targetPercent = 0;
   let displayedPercent = 0;
   const startedAt = performance.now();
@@ -500,65 +505,105 @@ function setupPageLoader(){
     }
   }, 15);
 
-  const updateTargetProgress = ()=>{
-    const imageProgress = Math.round((completed / total) * 80);
-    targetPercent = Math.min(100, 20 + imageProgress);
+  const markResourceLoaded = ()=>{
+    loadedResources += 1;
+    updateTargetProgress();
+    setLoaderData(loadedResources, totalResources);
   };
 
-  const loadAudioFirst = ()=>{
-    if (!audioUrl){
-      targetPercent = 20;
-      return Promise.resolve();
-    }
-
-    setLoaderTitle('Sabar ya, lagi download resource audio...');
-    return fetch(audioUrl, { cache: 'force-cache' })
+  const fetchBlobWithRetry = (url, retry = 1)=>{
+    const attempt = (left)=> fetch(url, { cache: 'force-cache' })
       .then((res)=>{
-        if (!res.ok) throw new Error(`audio fetch failed: ${res.status}`);
+        if (!res.ok) throw new Error(`resource fetch failed: ${res.status}`);
         return res.blob();
       })
-      .then(()=>{
-        targetPercent = 20;
-      })
-      .catch(()=>{
-        targetPercent = 20;
+      .catch((err)=>{
+        if (left <= 0) throw err;
+        return attempt(left - 1);
       });
+    return attempt(retry);
   };
 
-  const loadImage = (url)=> new Promise((resolve)=>{
+  const warmImageFromBlob = (blobUrl)=> new Promise((resolve)=>{
     let done = false;
     const finish = ()=>{
       if (done) return;
       done = true;
-      completed += 1;
-      updateTargetProgress();
       resolve();
     };
 
     const image = new Image();
     image.onload = finish;
     image.onerror = finish;
-    image.src = url;
+    image.src = blobUrl;
     if (image.complete) finish();
     setTimeout(finish, 5000);
   });
 
+  const updateTargetProgress = ()=>{
+    const nextTarget = Math.round((loadedResources / totalResources) * 100);
+    targetPercent = Math.max(targetPercent, Math.min(100, nextTarget));
+  };
+
+  const loadAudioFirst = ()=>{
+    if (!audioUrl){
+      setLoaderData(loadedResources, totalResources);
+      return Promise.resolve();
+    }
+
+    setLoaderTitle('Sabar ya, lagi download resource audio...');
+    return fetchBlobWithRetry(audioUrl, 1)
+      .then((audioBlob)=>{
+        const audioBlobUrl = URL.createObjectURL(audioBlob);
+        resourceBlobUrls.set(audioUrl, audioBlobUrl);
+        if (audioEl){
+          audioEl.src = audioBlobUrl;
+          audioEl.preload = 'auto';
+          audioEl.load();
+        }
+        markResourceLoaded();
+      })
+      .catch(()=>{
+        markResourceLoaded();
+      });
+  };
+
+  const loadImage = (url)=> fetchBlobWithRetry(url, 1)
+    .then((imageBlob)=>{
+      const imageBlobUrl = URL.createObjectURL(imageBlob);
+      resourceBlobUrls.set(url, imageBlobUrl);
+      return warmImageFromBlob(imageBlobUrl);
+    })
+    .then(()=>{
+      markResourceLoaded();
+    })
+    .catch(()=>{
+      markResourceLoaded();
+    });
+
   targetPercent = 3;
   setLoaderTitle('Sabar ya, lagi download resource...');
+  setLoaderData(loadedResources, totalResources);
   renderProgress();
 
   const loadImages = ()=>{
     setLoaderTitle('Sabar ya, lagi download resource foto...');
     if (!imageUrls.length){
-      completed = 1;
-      updateTargetProgress();
+      setLoaderData(loadedResources, totalResources);
       return Promise.resolve();
     }
-    return Promise.all(imageUrls.map(loadImage));
+    return Promise.all(imageUrls.map(loadImage)).then(()=>{
+      imageElements.forEach((img)=>{
+        const originalSrc = img.getAttribute('src');
+        const blobSrc = originalSrc && resourceBlobUrls.get(originalSrc);
+        if (blobSrc) img.src = blobSrc;
+      });
+    });
   };
 
   return loadAudioFirst().then(()=> loadImages()).then(()=>{
-    completed = total;
+    loadedResources = totalResources;
+    setLoaderData(loadedResources, totalResources);
     targetPercent = 100;
     setLoaderTitle('Selesai...');
     const elapsed = performance.now() - startedAt;
