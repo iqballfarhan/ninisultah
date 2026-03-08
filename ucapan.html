@@ -1,61 +1,150 @@
 <!doctype html>
 <html lang="id">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>From Iqbal</title>
-  <link rel="icon" type="image/png" href="assets/icon.png">
-  <link rel="apple-touch-icon" href="assets/icon.png">
-  <link rel="stylesheet" href="styles.css?v=20260308m">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>From Iqbal</title>
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="apple-touch-icon" href="assets/icon.png">
+    <link rel="stylesheet" href="styles.css?v=20260308n">
 </head>
-<body class="loaded">
-  <div class="intro-overlay" role="dialog" aria-label="Ucapan dari Iqbal">
-    <div class="intro-card">
-      <div id="ucapanIcon" class="intro-cake" aria-hidden="true">🎂</div>
-      <h1 class="intro-title">Ucapan dari Iqbal</h1>
-      <p id="ucapanStep" class="intro-subtitle">selamat ulang tahun yah sayang</p>
-      <p id="ucapanProgress" class="hint">1 / 5</p>
-      <button id="nextUcapanBtn" class="btn" type="button" aria-label="Lanjut ke ucapan berikutnya">Next</button>
-      <a href="index.html" class="btn btn-ghost" aria-label="Kembali ke halaman utama">← Kembali</a>
+
+<body class="loaded ucapan-page">
+    <div class="intro-overlay ucapan-overlay" role="dialog" aria-label="Ucapan dari Iqbal">
+        <div id="ucapanCard" class="intro-card ucapan-card">
+            <div id="ucapanIcon" class="intro-cake ucapan-icon" aria-hidden="true">🎂</div>
+            <!-- <h1 class="intro-title ucapan-title">From Iqbal ✨</h1> -->
+            <p id="ucapanStep" class="intro-subtitle ucapan-message">selamat ulang tahun yah sayang</p>
+            <p id="ucapanProgress" class="hint ucapan-progress">1 / 5</p>
+
+            <div class="ucapan-actions">
+                <button id="musicUcapanBtn" class="btn btn-ghost" type="button" aria-label="Putar atau pause lagu">Putar Lagu ♪</button>
+                <button id="nextUcapanBtn" class="btn" type="button" aria-label="Lanjut ke ucapan berikutnya">Next</button>
+                <a href="index.html" class="btn btn-ghost" aria-label="Kembali ke halaman utama">← Kembali</a>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const ucapanList = [
-      { text: 'selamat ulang tahun yah sayang', icon: '🎂' },
-      { text: 'semoga selalu panjang umurmu', icon: '🎈' },
-      { text: 'selalu sukses dimanapun', icon: '🚀' },
-      { text: 'selalu diberi kelancaran', icon: '🛣️' },
-      { text: 'semoga selalu diberi keberkahan', icon: '✨' }
-    ];
+    <audio id="ucapanAudio" src="assets/Bandaneira Sampai Jadi Debu (unofficial music video).mp3" preload="auto" loop></audio>
 
-    const ucapanIcon = document.getElementById('ucapanIcon');
-    const ucapanStep = document.getElementById('ucapanStep');
-    const ucapanProgress = document.getElementById('ucapanProgress');
-    const nextUcapanBtn = document.getElementById('nextUcapanBtn');
-    let currentIndex = 0;
+    <script>
+        const ucapanList = [
+            { text: 'Selamat ulang tahun ya sayangku...', icon: '🎂' },
+            { text: 'Semoga kamu selalu diberi kesehatan dan panjang umur', icon: '💪' },
+            { text: 'Semoga semua impian dan harapan kamu bisa tercapai', icon: '🌠' },
+            { text: 'Aku doakan semoga setiap langkahmu selalu dimudahkan', icon: '🕊️' },
+            { text: 'Terima kasih sudah hadir di hidup aku, semoga selalu diberkahi', icon: '🙏' },
 
-    function renderUcapan(){
-      const currentUcapan = ucapanList[currentIndex];
-      ucapanStep.textContent = currentUcapan.text;
-      if (ucapanIcon) ucapanIcon.textContent = currentUcapan.icon;
-      ucapanProgress.textContent = `${currentIndex + 1} / ${ucapanList.length}`;
-      nextUcapanBtn.textContent = currentIndex === ucapanList.length - 1 ? 'Selesai' : 'Next';
-    }
+            { text: 'Doaku selalu yang baik dan terbaik untukmu, ninisku <3', icon: '🤍' },
 
-    nextUcapanBtn.addEventListener('click', ()=>{
-      if (currentIndex < ucapanList.length - 1){
-        currentIndex += 1;
+            { text: 'Oh ya... maaf ya aku belum bisa jadi pasangan yang baik untuk dirimu', icon: '🥺' },
+            { text: 'Aku masih sering membuat kamu marah, bahkan membuat kamu overthinking... maafin aku ya', icon: '😔' },
+            { text: 'Aku sadar masih banyak kurangnya diriku untuk mendampingi kamu yang baik banget ke aku', icon: '🫶' },
+
+            { text: 'Terima kasih sudah menjadi pasangan yang baik, sabar, dan selalu pengertian ya', icon: '🌷' },
+            { text: 'Tetaplah menjadi yang terbaik di hidupku', icon: '👑' },
+
+            { text: 'Terima kasih sudah menemani prosesku yang panjang dan mungkin terasa lambat ini', icon: '🫂' },
+            { text: 'Terima kasih juga sudah selalu berjuang demi kebaikan dan keberlangsungan hubungan kita berdua', icon: '🤝' },
+
+            { text: 'Semoga kebaikan selalu mengikuti langkah kita berdua ya... amin', icon: '🍀' },
+
+            { text: 'Semoga suatu saat nanti ada ikatan halal di antara kita', icon: '💍' },
+            { text: 'Dan kita bisa bersama selamanya, sampai tua nanti', icon: '👴👵' },
+            { text: 'Sampai kita jadi debu, sampai aku di liang yang satu dan kamu di sebelahku, sampai keabadian... amin', icon: '♾️' },
+
+            { text: 'Aku sayang kamu ninisku, semoga kita bisa terus bersama sampai tua dan di keabadian... amin', icon: '💖' }
+        ];
+
+        const ucapanIcon = document.getElementById('ucapanIcon');
+        const ucapanCard = document.getElementById('ucapanCard');
+        const ucapanStep = document.getElementById('ucapanStep');
+        const ucapanProgress = document.getElementById('ucapanProgress');
+        const musicUcapanBtn = document.getElementById('musicUcapanBtn');
+        const nextUcapanBtn = document.getElementById('nextUcapanBtn');
+        const ucapanAudio = document.getElementById('ucapanAudio');
+        let currentIndex = 0;
+        let audioStarted = false;
+        let transitionTimer = null;
+        let transitionEndTimer = null;
+
+        function updateMusicButtonLabel() {
+            if (!musicUcapanBtn || !ucapanAudio) return;
+            musicUcapanBtn.textContent = ucapanAudio.paused ? 'Putar Lagu ♪' : 'Pause Lagu ♪';
+        }
+
+        function tryPlayMusic() {
+            if (!ucapanAudio) return;
+            ucapanAudio.play().then(() => {
+                audioStarted = true;
+                updateMusicButtonLabel();
+            }).catch(() => {
+                updateMusicButtonLabel();
+            });
+        }
+
+        function renderUcapan(withTransition = false) {
+            const currentUcapan = ucapanList[currentIndex];
+
+            if (transitionTimer) clearTimeout(transitionTimer);
+            if (transitionEndTimer) clearTimeout(transitionEndTimer);
+
+            const applyContent = () => {
+                ucapanStep.textContent = currentUcapan.text;
+                if (ucapanIcon) ucapanIcon.textContent = currentUcapan.icon;
+            };
+
+            if (withTransition && ucapanCard) {
+                ucapanCard.classList.add('is-changing');
+                transitionTimer = setTimeout(() => {
+                    applyContent();
+                }, 140);
+                transitionEndTimer = setTimeout(() => {
+                    ucapanCard.classList.remove('is-changing');
+                }, 360);
+            } else {
+                applyContent();
+            }
+
+            ucapanProgress.textContent = `${currentIndex + 1} / ${ucapanList.length}`;
+            nextUcapanBtn.textContent = currentIndex === ucapanList.length - 1 ? 'Selesai' : 'Next';
+        }
+
+        nextUcapanBtn.addEventListener('click', () => {
+            if (!audioStarted) tryPlayMusic();
+
+            if (currentIndex < ucapanList.length - 1) {
+                currentIndex += 1;
+                renderUcapan(true);
+                return;
+            }
+
+            nextUcapanBtn.disabled = true;
+            nextUcapanBtn.textContent = 'Semua ucapan sudah dibaca 💖';
+            if (ucapanIcon) ucapanIcon.textContent = '💖';
+        });
+
+        musicUcapanBtn.addEventListener('click', () => {
+            if (!ucapanAudio) return;
+
+            if (ucapanAudio.paused) {
+                tryPlayMusic();
+                return;
+            }
+
+            ucapanAudio.pause();
+            updateMusicButtonLabel();
+        });
+
+        ucapanAudio.addEventListener('play', updateMusicButtonLabel);
+        ucapanAudio.addEventListener('pause', updateMusicButtonLabel);
+
+        updateMusicButtonLabel();
+        tryPlayMusic();
+
         renderUcapan();
-        return;
-      }
-
-      nextUcapanBtn.disabled = true;
-      nextUcapanBtn.textContent = 'Semua ucapan sudah dibaca 💖';
-      if (ucapanIcon) ucapanIcon.textContent = '💖';
-    });
-
-    renderUcapan();
-  </script>
+    </script>
 </body>
+
 </html>

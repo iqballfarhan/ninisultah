@@ -36,6 +36,20 @@ body.js-reveal .reveal.is-visible{opacity:1;transform:none}
 .intro-subtitle{margin:0;color:#444}
 .intro-signature{margin:0;color:#333;font-weight:600;letter-spacing:.2px;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
 .intro-signature.show{opacity:1;transform:none}
+.ucapan-page{min-height:100dvh}
+.ucapan-overlay{overflow:hidden}
+.ucapan-overlay::before,.ucapan-overlay::after{content:'';position:absolute;border-radius:999px;pointer-events:none;filter:blur(2px)}
+.ucapan-overlay::before{width:260px;height:260px;background:rgba(255,222,233,0.5);top:-90px;left:-70px}
+.ucapan-overlay::after{width:240px;height:240px;background:rgba(181,255,252,0.5);right:-70px;bottom:-80px}
+.ucapan-card{max-width:min(92vw,540px);padding:28px 24px 24px;gap:12px;position:relative}
+.ucapan-title{font-size:clamp(1.3rem,4vw,1.8rem)}
+.ucapan-icon{animation:ucapan-icon-float 2.6s ease-in-out infinite}
+.ucapan-message{max-width:460px;font-size:1.06rem;line-height:1.6;color:#333}
+.ucapan-progress{margin:0;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.72);font-weight:700;color:#333}
+.ucapan-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%;margin-top:2px}
+.ucapan-actions .btn{min-width:132px;text-decoration:none}
+.ucapan-card #ucapanIcon,.ucapan-card #ucapanStep{transition:opacity .25s ease,transform .25s ease}
+.ucapan-card.is-changing #ucapanIcon,.ucapan-card.is-changing #ucapanStep{opacity:.35;transform:translateY(6px) scale(.98)}
 body.has-intro .wrap{opacity:0;transform:translateY(14px);pointer-events:none}
 body.entered .wrap{opacity:1;transform:none;pointer-events:auto}
 body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
@@ -83,6 +97,11 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
   100%{opacity:1;transform:translateY(0) scale(1)}
 }
 
+@keyframes ucapan-icon-float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-4px)}
+}
+
 @media (max-width:900px){
   .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -90,6 +109,10 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 @media (max-width:640px){
   .reveal{transition:opacity .42s ease,transform .42s ease}
   body.js-reveal .reveal{transform:translateY(16px)}
+  .ucapan-card{padding:22px 16px 18px}
+  .ucapan-message{font-size:1rem;line-height:1.55}
+  .ucapan-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .ucapan-actions .btn{width:100%;min-width:0}
   .slider{gap:0}
   .photo-frame{width:100%;height:min(78vw,320px)}
   #prevSlide,#nextSlide{position:absolute;top:50%;transform:translateY(-50%);z-index:2}
