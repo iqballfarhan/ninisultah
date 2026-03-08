@@ -331,12 +331,13 @@ function setupMemoryGalleryTemplate(){
   const memoryGrid = document.getElementById('memoryGrid');
   const sliderPhotos = Array.from(document.querySelectorAll('.photo-frame .photo'));
   if (!memoryGrid || !sliderPhotos.length) return;
+  const thumbVersionQuery = 'v=20260309-orient';
 
   const getGalleryThumbSrc = (fullSrc)=>{
     if (!fullSrc) return '';
     const fileMatch = fullSrc.match(/^assets\/([^/?#]+)\.(?:jpg|jpeg|png|webp)$/i);
     if (!fileMatch) return fullSrc;
-    return `assets/thumbs/${fileMatch[1]}.webp`;
+    return `assets/thumbs/${fileMatch[1]}.webp?${thumbVersionQuery}`;
   };
 
   const cards = sliderPhotos.map((img, index)=>{
@@ -518,12 +519,13 @@ function setupPageLoader(){
   const setLoaderData = (loaded, total)=>{
     if (loaderData) loaderData.textContent = `${loaded} / ${total} resource`;
   };
+  const thumbVersionQuery = 'v=20260309-orient';
 
   const getThumbSrcFromAsset = (fullSrc)=>{
     if (!fullSrc) return '';
     const fileMatch = fullSrc.match(/^assets\/([^/?#]+)\.(?:jpg|jpeg|png|webp)$/i);
     if (!fileMatch) return fullSrc;
-    return `assets/thumbs/${fileMatch[1]}.webp`;
+    return `assets/thumbs/${fileMatch[1]}.webp?${thumbVersionQuery}`;
   };
 
   const sliderImages = Array.from(document.querySelectorAll('.photo-frame .photo'));
