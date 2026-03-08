@@ -6,6 +6,9 @@ let scheduled = [];
 let audioElement = null;
 let audioSourceNode = null;
 let confettiSession = null;
+const CONFETTI_PLAY_DURATION = 6500;
+const CONFETTI_REPLAY_DELAY = 3000;
+const CONFETTI_FADE_DURATION = 700;
 
 const notes = [
   {f: 523.25, d: 0.45}, // C5
@@ -117,43 +120,56 @@ function stopMusic(){
 // confetti
 function runConfetti(){
   const canvas = document.getElementById('confettiCanvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  if (!canvas || !ctx) return;
+  if (!ctx) return;
 
   if (confettiSession){
     cancelAnimationFrame(confettiSession.rafId);
     clearTimeout(confettiSession.stopId);
+    clearTimeout(confettiSession.restartId);
     window.removeEventListener('resize', confettiSession.onResize);
     if (window.visualViewport){
       window.visualViewport.removeEventListener('resize', confettiSession.onResize);
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    confettiSession = null;
   }
 
   const colors = ['#ff6b6b', '#ffd93d', '#6bf0c3', '#6b8bff', '#d46bff'];
   const pieces = [];
-  const pieceCount = 180;
-  const edgePadding = 44;
+  const pieceCount = 150;
+  const edgePadding = 46;
   let w = 0;
   let h = 0;
+  let previousTime = performance.now();
+  let smoothedDelta = 1;
+  let cycleStartedAt = performance.now();
 
   const randomBetween = (min, max)=> min + Math.random() * (max - min);
 
-  const createPiece = (fromTop = true)=>{
+  const createPiece = ()=>{
     const width = randomBetween(5, 10);
     const height = randomBetween(10, 18);
     return {
       x: randomBetween(-edgePadding, w + edgePadding),
-      y: fromTop ? randomBetween(-h - edgePadding, -edgePadding) : randomBetween(-edgePadding, h + edgePadding),
+      y: randomBetween(-h - edgePadding, -edgePadding),
       w: width,
       h: height,
       color: colors[Math.floor(Math.random() * colors.length)],
-      vx: randomBetween(-1.2, 1.2),
-      vy: randomBetween(1.2, 3.2),
+      vx: randomBetween(-1.0, 1.0),
+      vy: randomBetween(1.15, 2.9),
       rotation: randomBetween(0, Math.PI * 2),
-      spin: randomBetween(-0.18, 0.18),
+      spin: randomBetween(-0.13, 0.13),
       waveOffset: randomBetween(0, Math.PI * 2),
     };
+  };
+
+  const refillPieces = ()=>{
+    pieces.length = 0;
+    for (let i = 0; i < pieceCount; i += 1){
+      pieces.push(createPiece());
+    }
   };
 
   const resizeCanvas = ()=>{
@@ -171,33 +187,47 @@ function runConfetti(){
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
 
-  resizeCanvas();
-
-  for (let i = 0; i < pieceCount; i += 1){
-    pieces.push(createPiece(true));
-  }
-
-  let rafId = 0;
-  let previousTime = performance.now();
+  const confettiState = {
+    rafId: 0,
+    stopId: 0,
+    restartId: 0,
+    onResize: ()=>{
+      resizeCanvas();
+    },
+  };
 
   const draw = (now)=>{
-    const delta = Math.min(34, now - previousTime) / 16.666;
+    if (confettiSession !== confettiState) return;
+
+    const rawDelta = Math.min(40, now - previousTime) / 16.666;
+    smoothedDelta = (smoothedDelta * 0.84) + (rawDelta * 0.16);
     previousTime = now;
+
+    const elapsed = now - cycleStartedAt;
+    const remaining = CONFETTI_PLAY_DURATION - elapsed;
+    let opacity = 1;
+    if (elapsed < CONFETTI_FADE_DURATION){
+      opacity = elapsed / CONFETTI_FADE_DURATION;
+    } else if (remaining < CONFETTI_FADE_DURATION){
+      opacity = Math.max(0, remaining / CONFETTI_FADE_DURATION);
+    }
+
     ctx.clearRect(0, 0, w, h);
+    ctx.globalAlpha = opacity;
 
     for (const piece of pieces){
-      const sway = Math.sin(now * 0.003 + piece.waveOffset) * 0.35;
-      piece.x += (piece.vx + sway) * delta;
-      piece.y += piece.vy * delta;
-      piece.rotation += piece.spin * delta;
+      const sway = Math.sin(now * 0.0026 + piece.waveOffset) * 0.3;
+      piece.x += (piece.vx + sway) * smoothedDelta;
+      piece.y += piece.vy * smoothedDelta;
+      piece.rotation += piece.spin * smoothedDelta;
 
       if (piece.x < -edgePadding) piece.x = w + edgePadding;
       if (piece.x > w + edgePadding) piece.x = -edgePadding;
       if (piece.y > h + edgePadding){
-        Object.assign(piece, createPiece(true));
+        Object.assign(piece, createPiece());
       }
 
-      const flip = 0.45 + Math.abs(Math.cos(now * 0.01 + piece.waveOffset)) * 0.9;
+      const flip = 0.55 + Math.abs(Math.cos(now * 0.009 + piece.waveOffset)) * 0.75;
       ctx.save();
       ctx.translate(piece.x, piece.y);
       ctx.rotate(piece.rotation);
@@ -207,30 +237,39 @@ function runConfetti(){
       ctx.restore();
     }
 
-    rafId = requestAnimationFrame(draw);
+    ctx.globalAlpha = 1;
+    confettiState.rafId = requestAnimationFrame(draw);
   };
 
-  const onResize = ()=>{
-    resizeCanvas();
+  const stopCycle = ()=>{
+    if (confettiSession !== confettiState) return;
+    cancelAnimationFrame(confettiState.rafId);
+    confettiState.rafId = 0;
+    ctx.clearRect(0, 0, w, h);
+    confettiState.restartId = setTimeout(()=>{
+      if (confettiSession !== confettiState) return;
+      startCycle();
+    }, CONFETTI_REPLAY_DELAY);
   };
 
-  window.addEventListener('resize', onResize, { passive: true });
+  const startCycle = ()=>{
+    if (confettiSession !== confettiState) return;
+    cycleStartedAt = performance.now();
+    previousTime = cycleStartedAt;
+    smoothedDelta = 1;
+    refillPieces();
+    confettiState.rafId = requestAnimationFrame(draw);
+    confettiState.stopId = setTimeout(stopCycle, CONFETTI_PLAY_DURATION);
+  };
+
+  resizeCanvas();
+  window.addEventListener('resize', confettiState.onResize, { passive: true });
   if (window.visualViewport){
-    window.visualViewport.addEventListener('resize', onResize, { passive: true });
+    window.visualViewport.addEventListener('resize', confettiState.onResize, { passive: true });
   }
 
-  rafId = requestAnimationFrame(draw);
-  const stopId = setTimeout(()=>{
-    cancelAnimationFrame(rafId);
-    window.removeEventListener('resize', onResize);
-    if (window.visualViewport){
-      window.visualViewport.removeEventListener('resize', onResize);
-    }
-    ctx.clearRect(0, 0, w, h);
-    confettiSession = null;
-  }, 6500);
-
-  confettiSession = { rafId, stopId, onResize };
+  confettiSession = confettiState;
+  startCycle();
 }
 
 function setupPhotoSlider(){
