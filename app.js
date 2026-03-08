@@ -338,10 +338,10 @@ function setupMemoryGalleryTemplate(){
 
     const photo = document.createElement('img');
     photo.className = 'memory-image';
-    photo.src = img.getAttribute('src') || '';
+    photo.src = img.currentSrc || img.src || img.getAttribute('src') || '';
     photo.alt = img.getAttribute('alt') || `Foto ${index + 1}`;
-    photo.loading = 'lazy';
-    photo.decoding = 'async';
+    photo.loading = 'eager';
+    photo.decoding = 'sync';
 
     const caption = document.createElement('p');
     caption.className = 'memory-caption';
@@ -596,8 +596,31 @@ function setupPageLoader(){
       imageElements.forEach((img)=>{
         const originalSrc = img.getAttribute('src');
         const blobSrc = originalSrc && resourceBlobUrls.get(originalSrc);
-        if (blobSrc) img.src = blobSrc;
+        if (blobSrc){
+          img.src = blobSrc;
+          img.setAttribute('src', blobSrc);
+        }
       });
+
+      const decodePromises = imageElements.map((img)=>{
+        if (!(img instanceof HTMLImageElement)) return Promise.resolve();
+        if (typeof img.decode === 'function'){
+          return img.decode().catch(()=>{});
+        }
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve)=>{
+          const finish = ()=>{
+            img.removeEventListener('load', finish);
+            img.removeEventListener('error', finish);
+            resolve();
+          };
+          img.addEventListener('load', finish, { once: true });
+          img.addEventListener('error', finish, { once: true });
+          setTimeout(finish, 5000);
+        });
+      });
+
+      return Promise.all(decodePromises);
     });
   };
 
