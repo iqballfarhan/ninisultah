@@ -463,7 +463,17 @@ function setupPhotoModal(){
     const activeSlideImage = target.closest('.photo-frame .photo.is-active');
     const memoryImage = target.closest('.memory-image');
     if (activeSlideImage instanceof HTMLImageElement){
-      openModal(activeSlideImage.currentSrc || activeSlideImage.src, activeSlideImage.alt);
+      const previewSrc = activeSlideImage.currentSrc || activeSlideImage.src;
+      const fullSrc = activeSlideImage.dataset.originalSrc || previewSrc;
+      openModal(previewSrc, activeSlideImage.alt);
+
+      if (fullSrc && fullSrc !== previewSrc){
+        const fullImage = new Image();
+        fullImage.onload = ()=>{
+          if (!modal.hidden) modalImage.src = fullSrc;
+        };
+        fullImage.src = fullSrc;
+      }
       return;
     }
 
@@ -509,14 +519,33 @@ function setupPageLoader(){
     if (loaderData) loaderData.textContent = `${loaded} / ${total} resource`;
   };
 
+  const getThumbSrcFromAsset = (fullSrc)=>{
+    if (!fullSrc) return '';
+    const fileMatch = fullSrc.match(/^assets\/([^/?#]+)\.(?:jpg|jpeg|png|webp)$/i);
+    if (!fileMatch) return fullSrc;
+    return `assets/thumbs/${fileMatch[1]}.webp`;
+  };
+
   const sliderImages = Array.from(document.querySelectorAll('.photo-frame .photo'));
   sliderImages.forEach((img)=>{
     const originalSrc = img.getAttribute('src');
     if (originalSrc && !img.dataset.originalSrc) img.dataset.originalSrc = originalSrc;
+
+    const thumbSrc = getThumbSrcFromAsset(originalSrc || '');
+    if (thumbSrc && thumbSrc !== originalSrc){
+      img.src = thumbSrc;
+      img.setAttribute('src', thumbSrc);
+      img.addEventListener('error', ()=>{
+        if (originalSrc){
+          img.src = originalSrc;
+          img.setAttribute('src', originalSrc);
+        }
+      }, { once: true });
+    }
   });
 
   const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo.is-active, .end-photo'));
-  const imageUrls = Array.from(new Set(imageElements.map((img)=> img.dataset.originalSrc || img.getAttribute('src')).filter(Boolean)));
+  const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
   const audioEl = document.getElementById('bgAudio');
   const audioUrl = audioEl && audioEl.getAttribute('src');
   const resourceBlobUrls = new Map();
@@ -629,8 +658,8 @@ function setupPageLoader(){
     }
     return Promise.all(imageUrls.map(loadImage)).then(()=>{
       imageElements.forEach((img)=>{
-        const originalSrc = img.dataset.originalSrc || img.getAttribute('src');
-        const blobSrc = originalSrc && resourceBlobUrls.get(originalSrc);
+        const preloadSrc = img.getAttribute('src');
+        const blobSrc = preloadSrc && resourceBlobUrls.get(preloadSrc);
         if (blobSrc){
           img.src = blobSrc;
           img.setAttribute('src', blobSrc);
