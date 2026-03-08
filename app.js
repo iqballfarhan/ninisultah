@@ -5,6 +5,7 @@ let isPlaying = false;
 let scheduled = [];
 let audioElement = null;
 let audioSourceNode = null;
+let confettiSession = null;
 
 const notes = [
   {f: 523.25, d: 0.45}, // C5
@@ -117,30 +118,119 @@ function stopMusic(){
 function runConfetti(){
   const canvas = document.getElementById('confettiCanvas');
   const ctx = canvas.getContext('2d');
-  let w = canvas.width = window.innerWidth;
-  let h = canvas.height = window.innerHeight;
-  const pieces = [];
-  const colors = ['#ff6b6b','#ffd93d','#6bf0c3','#6b8bff','#d46bff'];
-  for (let i=0;i<120;i++){
-    pieces.push({x:Math.random()*w,y:Math.random()*-h, r:Math.random()*6+4, c:colors[Math.floor(Math.random()*colors.length)], vx:(Math.random()-0.5)*1.6, vy:Math.random()*2+1, rot:Math.random()*360});
-  }
-  let raf;
-  function draw(){
-    ctx.clearRect(0,0,w,h);
-    for (const p of pieces){
-      p.x += p.vx; p.y += p.vy; p.rot += 6;
-      ctx.save();
-      ctx.translate(p.x,p.y);
-      ctx.rotate(p.rot*Math.PI/180);
-      ctx.fillStyle = p.c;
-      ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);
-      ctx.restore();
-      if (p.y > h + 20) { p.y = Math.random()*-h; p.x = Math.random()*w; }
+  if (!canvas || !ctx) return;
+
+  if (confettiSession){
+    cancelAnimationFrame(confettiSession.rafId);
+    clearTimeout(confettiSession.stopId);
+    window.removeEventListener('resize', confettiSession.onResize);
+    if (window.visualViewport){
+      window.visualViewport.removeEventListener('resize', confettiSession.onResize);
     }
-    raf = requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
-  draw();
-  setTimeout(()=>{ cancelAnimationFrame(raf); ctx.clearRect(0,0,w,h); }, 6000);
+
+  const colors = ['#ff6b6b', '#ffd93d', '#6bf0c3', '#6b8bff', '#d46bff'];
+  const pieces = [];
+  const pieceCount = 180;
+  const edgePadding = 44;
+  let w = 0;
+  let h = 0;
+
+  const randomBetween = (min, max)=> min + Math.random() * (max - min);
+
+  const createPiece = (fromTop = true)=>{
+    const width = randomBetween(5, 10);
+    const height = randomBetween(10, 18);
+    return {
+      x: randomBetween(-edgePadding, w + edgePadding),
+      y: fromTop ? randomBetween(-h - edgePadding, -edgePadding) : randomBetween(-edgePadding, h + edgePadding),
+      w: width,
+      h: height,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: randomBetween(-1.2, 1.2),
+      vy: randomBetween(1.2, 3.2),
+      rotation: randomBetween(0, Math.PI * 2),
+      spin: randomBetween(-0.18, 0.18),
+      waveOffset: randomBetween(0, Math.PI * 2),
+    };
+  };
+
+  const resizeCanvas = ()=>{
+    const viewportWidth = Math.round(window.visualViewport?.width || window.innerWidth || 0);
+    const viewportHeight = Math.round(window.visualViewport?.height || window.innerHeight || 0);
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+    w = Math.max(320, viewportWidth);
+    h = Math.max(320, viewportHeight);
+
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  resizeCanvas();
+
+  for (let i = 0; i < pieceCount; i += 1){
+    pieces.push(createPiece(true));
+  }
+
+  let rafId = 0;
+  let previousTime = performance.now();
+
+  const draw = (now)=>{
+    const delta = Math.min(34, now - previousTime) / 16.666;
+    previousTime = now;
+    ctx.clearRect(0, 0, w, h);
+
+    for (const piece of pieces){
+      const sway = Math.sin(now * 0.003 + piece.waveOffset) * 0.35;
+      piece.x += (piece.vx + sway) * delta;
+      piece.y += piece.vy * delta;
+      piece.rotation += piece.spin * delta;
+
+      if (piece.x < -edgePadding) piece.x = w + edgePadding;
+      if (piece.x > w + edgePadding) piece.x = -edgePadding;
+      if (piece.y > h + edgePadding){
+        Object.assign(piece, createPiece(true));
+      }
+
+      const flip = 0.45 + Math.abs(Math.cos(now * 0.01 + piece.waveOffset)) * 0.9;
+      ctx.save();
+      ctx.translate(piece.x, piece.y);
+      ctx.rotate(piece.rotation);
+      ctx.scale(1, flip);
+      ctx.fillStyle = piece.color;
+      ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+      ctx.restore();
+    }
+
+    rafId = requestAnimationFrame(draw);
+  };
+
+  const onResize = ()=>{
+    resizeCanvas();
+  };
+
+  window.addEventListener('resize', onResize, { passive: true });
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', onResize, { passive: true });
+  }
+
+  rafId = requestAnimationFrame(draw);
+  const stopId = setTimeout(()=>{
+    cancelAnimationFrame(rafId);
+    window.removeEventListener('resize', onResize);
+    if (window.visualViewport){
+      window.visualViewport.removeEventListener('resize', onResize);
+    }
+    ctx.clearRect(0, 0, w, h);
+    confettiSession = null;
+  }, 6500);
+
+  confettiSession = { rafId, stopId, onResize };
 }
 
 function setupPhotoSlider(){
@@ -342,14 +432,22 @@ function setupPageLoader(){
     return Promise.resolve();
   }
 
+  const loaderTitle = loader.querySelector('.loader-title');
+  const setLoaderTitle = (text)=>{
+    if (loaderTitle) loaderTitle.textContent = text;
+  };
+
   const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo, .end-photo'));
   const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
+  const audioEl = document.getElementById('bgAudio');
+  const audioUrl = audioEl && audioEl.getAttribute('src');
+
   const total = imageUrls.length || 1;
   let completed = 0;
   let targetPercent = 0;
   let displayedPercent = 0;
   const startedAt = performance.now();
-  const minimumDuration = 1000;
+  const minimumDuration = 1200;
 
   const renderProgress = ()=>{
     loaderBar.style.width = `${displayedPercent}%`;
@@ -364,7 +462,28 @@ function setupPageLoader(){
   }, 15);
 
   const updateTargetProgress = ()=>{
-    targetPercent = Math.min(100, Math.round((completed / total) * 100));
+    const imageProgress = Math.round((completed / total) * 80);
+    targetPercent = Math.min(100, 20 + imageProgress);
+  };
+
+  const loadAudioFirst = ()=>{
+    if (!audioUrl){
+      targetPercent = 20;
+      return Promise.resolve();
+    }
+
+    setLoaderTitle('Menyiapkan audio...');
+    return fetch(audioUrl, { cache: 'force-cache' })
+      .then((res)=>{
+        if (!res.ok) throw new Error(`audio fetch failed: ${res.status}`);
+        return res.blob();
+      })
+      .then(()=>{
+        targetPercent = 20;
+      })
+      .catch(()=>{
+        targetPercent = 20;
+      });
   };
 
   const loadImage = (url)=> new Promise((resolve)=>{
@@ -385,17 +504,23 @@ function setupPageLoader(){
     setTimeout(finish, 5000);
   });
 
-  targetPercent = 6;
+  targetPercent = 3;
   renderProgress();
 
-  const allReady = imageUrls.length ? Promise.all(imageUrls.map(loadImage)) : Promise.resolve().then(()=>{
-    completed = 1;
-    updateTargetProgress();
-  });
+  const loadImages = ()=>{
+    setLoaderTitle('Mengunduh semua foto...');
+    if (!imageUrls.length){
+      completed = 1;
+      updateTargetProgress();
+      return Promise.resolve();
+    }
+    return Promise.all(imageUrls.map(loadImage));
+  };
 
-  return allReady.then(()=>{
+  return loadAudioFirst().then(()=> loadImages()).then(()=>{
     completed = total;
     targetPercent = 100;
+    setLoaderTitle('Selesai...');
     const elapsed = performance.now() - startedAt;
     const remaining = Math.max(0, minimumDuration - elapsed);
     return new Promise((resolve)=>{
@@ -440,8 +565,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     });
     document.getElementById('confettiBtn').addEventListener('click', ()=> runConfetti());
-    window.addEventListener('resize', ()=>{
-      const c=document.getElementById('confettiCanvas'); c.width=window.innerWidth; c.height=window.innerHeight;
-    });
   });
 });
