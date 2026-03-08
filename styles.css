@@ -11,6 +11,7 @@ body{
   margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
   display:block;padding:clamp(12px,2.4vw,24px) clamp(10px,2vw,16px) 40px;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
 }
 body.modal-open{overflow:hidden}
 .page-loader{position:fixed;inset:0;z-index:60;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease,visibility .45s ease}
@@ -28,7 +29,7 @@ body:not(.loaded) .wrap{opacity:0;pointer-events:none}
 body.js-reveal .reveal{opacity:0;transform:translateY(24px)}
 body.js-reveal .reveal.is-visible{opacity:1;transform:none}
 .intro-overlay{position:fixed;inset:0;z-index:20;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .45s ease,visibility .45s ease}
-.intro-card{background:var(--card);border-radius:18px;padding:24px 20px;max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.7)}
+.intro-card{background:var(--card);border-radius:18px;padding:24px 20px;max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,0.1);border:1px solid rgba(255,255,255,0.7);animation:card-appear .45s ease both}
 .intro-cake{font-size:4rem;line-height:1;cursor:pointer;transform-origin:center;transition:transform .2s ease}
 .intro-cake:hover{transform:scale(1.05)}
 .intro-title{margin:0;color:#333}
@@ -65,7 +66,8 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .vol{display:inline-flex;align-items:center;gap:10px;color:#333}
 .vol input{width:min(42vw,180px)}
 .hint{margin-top:12px;color:#333a;font-size:0.9rem}
-.confetti-canvas{position:fixed;inset:0;z-index:35;pointer-events:none;width:100vw;height:100dvh;}
+.card,.memory-card,.photo-frame,.btn,.slide-btn,.intro-card{transform:translateZ(0);backface-visibility:hidden}
+.confetti-canvas{position:fixed;inset:0;z-index:35;pointer-events:none;width:100vw;height:100vh;height:100dvh;}
 .photo-modal{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.78);display:flex;align-items:center;justify-content:center;padding:20px}
 .photo-modal[hidden]{display:none}
 .photo-modal-image{max-width:min(100%,1100px);max-height:88vh;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,0.4);object-fit:contain;background:rgba(255,255,255,0.1)}
@@ -76,11 +78,18 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
   50%{transform:translateY(6px)}
 }
 
+@keyframes card-appear{
+  0%{opacity:0;transform:translateY(10px) scale(0.985)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
 @media (max-width:900px){
   .memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media (max-width:640px){
+  .reveal{transition:opacity .42s ease,transform .42s ease}
+  body.js-reveal .reveal{transform:translateY(16px)}
   .slider{gap:0}
   .photo-frame{width:100%;height:min(78vw,320px)}
   #prevSlide,#nextSlide{position:absolute;top:50%;transform:translateY(-50%);z-index:2}
@@ -91,6 +100,12 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
   .controls .vol{grid-column:1 / -1;justify-content:center;flex-wrap:wrap}
   .vol input{width:min(84vw,260px)}
   .section-subtitle{font-size:.95rem}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .scroll-cue{animation:none}
+  .intro-card,.reveal{transition:none;animation:none}
+  body.js-reveal .reveal{opacity:1;transform:none}
 }
 
 @media (max-width:480px){
