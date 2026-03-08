@@ -40,8 +40,13 @@ body.js-reveal .reveal.is-visible{opacity:1;transform:none}
 .intro-cake:hover{transform:scale(1.12);animation-play-state:paused}
 .intro-title{margin:0;color:#333}
 .intro-subtitle{margin:0;color:#444}
-.intro-signature{margin:0;color:#333;font-weight:600;letter-spacing:.2px;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease}
-.intro-signature.show{opacity:1;transform:none}
+.intro-signature{margin:0;color:#d84a72;font-weight:800;letter-spacing:.25px;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease;display:inline-block;position:relative;padding:0 18px}
+.intro-signature::before,.intro-signature::after{content:'✦';position:absolute;top:50%;font-size:.78rem;line-height:1;color:#ff6b8e;opacity:0;transform:translateY(-50%) scale(.85)}
+.intro-signature::before{left:0}
+.intro-signature::after{right:0}
+.intro-signature.show{opacity:1;transform:none;animation:intro-signature-standout 1.9s ease-in-out infinite}
+.intro-signature.show::before,.intro-signature.show::after{opacity:1;animation:intro-signature-sparkle 1.5s ease-in-out infinite}
+.intro-signature.show::after{animation-delay:.25s}
 .ucapan-page{min-height:100dvh}
 .ucapan-overlay{overflow:hidden}
 .ucapan-overlay::before,.ucapan-overlay::after{content:'';position:absolute;border-radius:999px;pointer-events:none;filter:blur(2px)}
@@ -97,6 +102,11 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .scroll-cue{align-self:center}
 .scroll-cue-icon{font-size:1.8rem;line-height:1;transform:translateY(-2px)}
 .btn{background:var(--accent);border:0;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+.ucapan-cta{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:800;letter-spacing:.2px;box-shadow:0 10px 22px rgba(255,107,107,.3),0 3px 10px rgba(0,0,0,.08);animation:ucapan-cta-pulse 1.8s ease-in-out infinite;transition:transform .2s ease,box-shadow .2s ease}
+.ucapan-cta::before{content:'💌';font-size:1rem;line-height:1;animation:ucapan-cta-icon 1.5s ease-in-out infinite}
+.ucapan-cta::after{content:'Klik';position:absolute;right:-10px;top:-11px;padding:4px 8px;border-radius:999px;background:#fff;color:#d84a72;font-size:.72rem;font-weight:800;box-shadow:0 6px 14px rgba(0,0,0,.12);animation:ucapan-cta-badge 1.2s ease-in-out infinite}
+.ucapan-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 14px 26px rgba(255,107,107,.4),0 7px 16px rgba(0,0,0,.12)}
+.ucapan-cta:focus-visible{outline:3px solid rgba(255,107,107,.35);outline-offset:3px}
 .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.08);color:#333}
 .vol{display:inline-flex;align-items:center;gap:10px;color:#333}
 .vol input{width:min(42vw,180px)}
@@ -162,6 +172,16 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
   65%{transform:translateY(-2px) scale(1.06) rotate(4deg);text-shadow:0 8px 18px rgba(0,0,0,0.13),0 0 20px rgba(255,107,107,0.36)}
 }
 
+@keyframes intro-signature-standout{
+  0%,100%{text-shadow:0 1px 6px rgba(216,74,114,.18),0 0 0 rgba(255,107,142,0)}
+  50%{text-shadow:0 6px 16px rgba(216,74,114,.32),0 0 16px rgba(255,107,142,.38)}
+}
+
+@keyframes intro-signature-sparkle{
+  0%,100%{transform:translateY(-50%) scale(.9);opacity:.7}
+  50%{transform:translateY(-64%) scale(1.15);opacity:1}
+}
+
 @keyframes gallery-title-glow{
   0%,100%{transform:translateY(0);text-shadow:0 2px 8px rgba(0,0,0,.06),0 0 0 rgba(255,107,142,0)}
   50%{transform:translateY(-1px);text-shadow:0 8px 18px rgba(0,0,0,.12),0 0 18px rgba(255,107,142,.36)}
@@ -180,6 +200,21 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 @keyframes gallery-arrow-bounce{
   0%,100%{transform:translateY(0)}
   50%{transform:translateY(3px)}
+}
+
+@keyframes ucapan-cta-pulse{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-1px) scale(1.025)}
+}
+
+@keyframes ucapan-cta-icon{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-1px) rotate(-8deg)}
+}
+
+@keyframes ucapan-cta-badge{
+  0%,100%{transform:translateY(0) scale(1);opacity:.85}
+  50%{transform:translateY(-2px) scale(1.08);opacity:1}
 }
 
 @keyframes text-standout-glow{
@@ -217,7 +252,7 @@ body.entered .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 
 @media (prefers-reduced-motion:reduce){
   .scroll-cue{animation:none}
-  .intro-card,.reveal,.intro-cake,.ucapan-icon,.title-standout,.subtitle-love,.subtitle-love::before,.subtitle-love::after,#gallerySection .section-title,#gallerySection .section-title::before,#gallerySection .section-title::after,#gallerySection .section-subtitle,#gallerySection .section-subtitle::after,.text-standout,.text-standout::before,.text-standout::after{transition:none;animation:none}
+  .intro-card,.reveal,.intro-cake,.ucapan-icon,.title-standout,.subtitle-love,.subtitle-love::before,.subtitle-love::after,#gallerySection .section-title,#gallerySection .section-title::before,#gallerySection .section-title::after,#gallerySection .section-subtitle,#gallerySection .section-subtitle::after,.text-standout,.text-standout::before,.text-standout::after,.ucapan-cta,.ucapan-cta::before,.ucapan-cta::after,.intro-signature,.intro-signature::before,.intro-signature::after{transition:none;animation:none}
   body.js-reveal .reveal{opacity:1;transform:none}
 }
 
