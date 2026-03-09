@@ -331,14 +331,6 @@ function setupMemoryGalleryTemplate(){
   const memoryGrid = document.getElementById('memoryGrid');
   const sliderPhotos = Array.from(document.querySelectorAll('.photo-frame .photo'));
   if (!memoryGrid || !sliderPhotos.length) return;
-  const thumbVersionQuery = 'v=20260309-orient';
-
-  const getGalleryThumbSrc = (fullSrc)=>{
-    if (!fullSrc) return '';
-    const fileMatch = fullSrc.match(/^assets\/([^/?#]+)\.(?:jpg|jpeg|png|webp)$/i);
-    if (!fileMatch) return fullSrc;
-    return `assets/thumbs/${fileMatch[1]}.webp?${thumbVersionQuery}`;
-  };
 
   const cards = sliderPhotos.map((img, index)=>{
     const card = document.createElement('article');
@@ -347,13 +339,7 @@ function setupMemoryGalleryTemplate(){
     const photo = document.createElement('img');
     photo.className = 'memory-image';
     const fullSrc = img.dataset.originalSrc || img.getAttribute('src') || img.currentSrc || img.src || '';
-    const thumbSrc = getGalleryThumbSrc(fullSrc);
-    photo.src = thumbSrc || fullSrc;
-    if (thumbSrc && thumbSrc !== fullSrc){
-      photo.addEventListener('error', ()=>{
-        photo.src = fullSrc;
-      }, { once: true });
-    }
+    photo.src = fullSrc;
     if (fullSrc) photo.dataset.fullSrc = fullSrc;
     photo.alt = img.getAttribute('alt') || `Foto ${index + 1}`;
     photo.loading = 'lazy';
@@ -519,31 +505,11 @@ function setupPageLoader(){
   const setLoaderData = (loaded, total)=>{
     if (loaderData) loaderData.textContent = `${loaded} / ${total} resource`;
   };
-  const thumbVersionQuery = 'v=20260309-orient';
-
-  const getThumbSrcFromAsset = (fullSrc)=>{
-    if (!fullSrc) return '';
-    const fileMatch = fullSrc.match(/^assets\/([^/?#]+)\.(?:jpg|jpeg|png|webp)$/i);
-    if (!fileMatch) return fullSrc;
-    return `assets/thumbs/${fileMatch[1]}.webp?${thumbVersionQuery}`;
-  };
 
   const sliderImages = Array.from(document.querySelectorAll('.photo-frame .photo'));
   sliderImages.forEach((img)=>{
     const originalSrc = img.getAttribute('src');
     if (originalSrc && !img.dataset.originalSrc) img.dataset.originalSrc = originalSrc;
-
-    const thumbSrc = getThumbSrcFromAsset(originalSrc || '');
-    if (thumbSrc && thumbSrc !== originalSrc){
-      img.src = thumbSrc;
-      img.setAttribute('src', thumbSrc);
-      img.addEventListener('error', ()=>{
-        if (originalSrc){
-          img.src = originalSrc;
-          img.setAttribute('src', originalSrc);
-        }
-      }, { once: true });
-    }
   });
 
   const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo.is-active, .end-photo'));
