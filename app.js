@@ -542,8 +542,6 @@ function setupPageLoader(){
   let loadedResources = 0;
   let targetPercent = 0;
   let displayedPercent = 0;
-  const startedAt = performance.now();
-  const minimumDuration = 1200;
 
   const renderProgress = ()=>{
     loaderBar.style.width = `${displayedPercent}%`;
@@ -571,7 +569,7 @@ function setupPageLoader(){
     }
 
     return Promise.all(resourceUrls.map((url)=>
-      fetch(url, { method: 'HEAD', cache: 'force-cache' })
+      fetchWithTimeout(url, { method: 'HEAD', cache: 'force-cache' }, 8000)
         .then((res)=>{
           if (!res.ok) return 0;
           const contentLength = Number(res.headers.get('content-length'));
@@ -584,8 +582,15 @@ function setupPageLoader(){
     });
   };
 
+  const fetchWithTimeout = (url, options = {}, timeoutMs = 20000)=>{
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=> controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal })
+      .finally(()=> clearTimeout(timeoutId));
+  };
+
   const fetchBlobWithRetry = (url, retry = 1)=>{
-    const attempt = (left)=> fetch(url, { cache: 'force-cache' })
+    const attempt = (left)=> fetchWithTimeout(url, { cache: 'force-cache' }, 20000)
       .then((res)=>{
         if (!res.ok) throw new Error(`resource fetch failed: ${res.status}`);
         return res.blob();
@@ -645,10 +650,10 @@ function setupPageLoader(){
     .then((imageBlob)=>{
       const imageBlobUrl = URL.createObjectURL(imageBlob);
       resourceBlobUrls.set(url, imageBlobUrl);
-      return warmImageFromBlob(imageBlobUrl);
+      return warmImageFromBlob(imageBlobUrl).then(()=> imageBlob.size);
     })
-    .then(()=>{
-      markResourceLoaded(imageBlob.size);
+    .then((sizeBytes)=>{
+      markResourceLoaded(sizeBytes);
     })
     .catch(()=>{
       markResourceLoaded();
@@ -701,25 +706,31 @@ function setupPageLoader(){
     loadedResources = totalResources;
     setLoaderData(loadedResources, totalResources);
     targetPercent = 100;
+    displayedPercent = 100;
+    renderProgress();
     setLoaderTitle('Selesai...');
-    const elapsed = performance.now() - startedAt;
-    const remaining = Math.max(0, minimumDuration - elapsed);
+    clearInterval(animateProgressTimer);
     return new Promise((resolve)=>{
-      const finishLoader = ()=>{
-        if (displayedPercent < 100){
-          setTimeout(finishLoader, 25);
-          return;
-        }
-        clearInterval(animateProgressTimer);
-        loader.classList.add('is-done');
-        document.body.classList.add('loaded');
-        setTimeout(()=>{
-          loader.remove();
-          resolve();
-        }, 460);
-      };
-
-      setTimeout(finishLoader, remaining);
+      loader.classList.add('is-done');
+      document.body.classList.add('loaded');
+      setTimeout(()=>{
+        loader.remove();
+        resolve();
+      }, 280);
+    });
+  }).catch(()=>{
+    clearInterval(animateProgressTimer);
+    targetPercent = 100;
+    displayedPercent = 100;
+    renderProgress();
+    setLoaderTitle('Selesai...');
+    document.body.classList.add('loaded');
+    loader.classList.add('is-done');
+    return new Promise((resolve)=>{
+      setTimeout(()=>{
+        loader.remove();
+        resolve();
+      }, 280);
     });
   });
 }
