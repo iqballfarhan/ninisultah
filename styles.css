@@ -30,6 +30,7 @@ body.modal-open{overflow:hidden}
 body:not(.loaded) .intro-overlay{opacity:0;visibility:hidden;pointer-events:none}
 body:not(.loaded) .wrap{opacity:0;pointer-events:none}
 .wrap{max-width:860px;width:100%;margin:0 auto;text-align:center;display:flex;flex-direction:column;gap:22px;transition:opacity .45s ease,transform .45s ease}
+body.index-page .wrap{padding-bottom:clamp(24px,6vh,64px)}
 .section{display:flex;flex-direction:column;gap:12px;width:100%}
 .reveal{opacity:1;transform:none;transition:opacity .55s ease,transform .55s ease}
 body.js-reveal .reveal{opacity:0;transform:translateY(24px)}
