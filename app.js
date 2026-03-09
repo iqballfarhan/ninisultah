@@ -502,8 +502,27 @@ function setupPageLoader(){
   const setLoaderTitle = (text)=>{
     if (loaderTitle) loaderTitle.textContent = text;
   };
+  const formatBytes = (bytes)=>{
+    const safeBytes = Number.isFinite(bytes) && bytes > 0 ? bytes : 0;
+    if (safeBytes < 1024) return `${safeBytes} B`;
+    const units = ['KB', 'MB', 'GB'];
+    let value = safeBytes / 1024;
+    let unitIndex = 0;
+    while (value >= 1024 && unitIndex < units.length - 1){
+      value /= 1024;
+      unitIndex += 1;
+    }
+    const precision = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+    return `${value.toFixed(precision)} ${units[unitIndex]}`;
+  };
+
+  let downloadedBytes = 0;
+  let estimatedTotalBytes = 0;
   const setLoaderData = (loaded, total)=>{
-    if (loaderData) loaderData.textContent = `${loaded} / ${total} resource`;
+    if (!loaderData) return;
+    const downloadedLabel = formatBytes(downloadedBytes);
+    const estimatedLabel = estimatedTotalBytes > 0 ? ` / ${formatBytes(estimatedTotalBytes)}` : '';
+    loaderData.textContent = `${loaded} / ${total} resource • ${downloadedLabel}${estimatedLabel}`;
   };
 
   const sliderImages = Array.from(document.querySelectorAll('.photo-frame .photo'));
@@ -512,10 +531,11 @@ function setupPageLoader(){
     if (originalSrc && !img.dataset.originalSrc) img.dataset.originalSrc = originalSrc;
   });
 
-  const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo.is-active, .end-photo'));
+  const imageElements = Array.from(document.querySelectorAll('.photo-frame .photo, .end-photo'));
   const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
   const audioEl = document.getElementById('bgAudio');
   const audioUrl = audioEl && audioEl.getAttribute('src');
+  const resourceUrls = Array.from(new Set([...imageUrls, ...(audioUrl ? [audioUrl] : [])]));
   const resourceBlobUrls = new Map();
 
   const totalResources = Math.max(1, imageUrls.length + (audioUrl ? 1 : 0));
@@ -537,10 +557,31 @@ function setupPageLoader(){
     }
   }, 15);
 
-  const markResourceLoaded = ()=>{
+  const markResourceLoaded = (sizeBytes = 0)=>{
     loadedResources += 1;
+    downloadedBytes += Math.max(0, Number(sizeBytes) || 0);
     updateTargetProgress();
     setLoaderData(loadedResources, totalResources);
+  };
+
+  const estimateTotalResourceSize = ()=>{
+    if (!resourceUrls.length){
+      setLoaderData(loadedResources, totalResources);
+      return Promise.resolve();
+    }
+
+    return Promise.all(resourceUrls.map((url)=>
+      fetch(url, { method: 'HEAD', cache: 'force-cache' })
+        .then((res)=>{
+          if (!res.ok) return 0;
+          const contentLength = Number(res.headers.get('content-length'));
+          return Number.isFinite(contentLength) && contentLength > 0 ? contentLength : 0;
+        })
+        .catch(()=> 0)
+    )).then((sizes)=>{
+      estimatedTotalBytes = sizes.reduce((sum, size)=> sum + size, 0);
+      setLoaderData(loadedResources, totalResources);
+    });
   };
 
   const fetchBlobWithRetry = (url, retry = 1)=>{
@@ -593,7 +634,7 @@ function setupPageLoader(){
           audioEl.preload = 'auto';
           audioEl.load();
         }
-        markResourceLoaded();
+        markResourceLoaded(audioBlob.size);
       })
       .catch(()=>{
         markResourceLoaded();
@@ -607,14 +648,14 @@ function setupPageLoader(){
       return warmImageFromBlob(imageBlobUrl);
     })
     .then(()=>{
-      markResourceLoaded();
+      markResourceLoaded(imageBlob.size);
     })
     .catch(()=>{
       markResourceLoaded();
     });
 
   targetPercent = 3;
-  setLoaderTitle('Sabar ya, lagi download resource...');
+  setLoaderTitle('Sabar ya, lagi hitung ukuran resource...');
   setLoaderData(loadedResources, totalResources);
   renderProgress();
 
@@ -656,7 +697,7 @@ function setupPageLoader(){
     });
   };
 
-  return loadAudioFirst().then(()=> loadImages()).then(()=>{
+  return estimateTotalResourceSize().catch(()=>{}).then(()=> loadAudioFirst()).then(()=> loadImages()).then(()=>{
     loadedResources = totalResources;
     setLoaderData(loadedResources, totalResources);
     targetPercent = 100;
