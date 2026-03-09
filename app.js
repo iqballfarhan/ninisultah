@@ -338,11 +338,17 @@ function setupMemoryGalleryTemplate(){
 
     const photo = document.createElement('img');
     photo.className = 'memory-image';
-    const fullSrc = img.dataset.originalSrc || img.getAttribute('src') || img.currentSrc || img.src || '';
-    photo.src = fullSrc;
+    const previewSrc = img.currentSrc || img.getAttribute('src') || img.src || '';
+    const fullSrc = img.dataset.originalSrc || previewSrc;
+    photo.src = previewSrc || fullSrc;
     if (fullSrc) photo.dataset.fullSrc = fullSrc;
+    if (fullSrc && previewSrc && previewSrc !== fullSrc){
+      photo.addEventListener('error', ()=>{
+        photo.src = fullSrc;
+      }, { once: true });
+    }
     photo.alt = img.getAttribute('alt') || `Foto ${index + 1}`;
-    photo.loading = 'lazy';
+    photo.loading = 'eager';
     photo.decoding = 'async';
 
     const caption = document.createElement('p');
