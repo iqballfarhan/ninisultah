@@ -535,13 +535,10 @@ function setupPageLoader(){
   };
 
   let downloadedBytes = 0;
-  let estimatedTotalBytes = 0;
   const setLoaderData = (loaded, total)=>{
     if (!loaderData) return;
     const downloadedLabel = formatBytes(downloadedBytes);
-    const displayEstimatedTotal = Math.max(estimatedTotalBytes, downloadedBytes);
-    const estimatedLabel = displayEstimatedTotal > 0 ? ` / ${formatBytes(displayEstimatedTotal)} (estimasi)` : '';
-    loaderData.textContent = `${loaded} / ${total} resource • ${downloadedLabel}${estimatedLabel}`;
+    loaderData.textContent = `${loaded} / ${total} resource • ${downloadedLabel} terunduh`;
   };
 
   const sliderImages = Array.from(document.querySelectorAll('.photo-frame .photo'));
@@ -554,7 +551,6 @@ function setupPageLoader(){
   const imageUrls = Array.from(new Set(imageElements.map((img)=> img.getAttribute('src')).filter(Boolean)));
   const audioEl = document.getElementById('bgAudio');
   const audioUrl = audioEl && audioEl.getAttribute('src');
-  const resourceUrls = Array.from(new Set([...imageUrls, ...(audioUrl ? [audioUrl] : [])]));
   const resourceBlobUrls = new Map();
 
   const totalResources = Math.max(1, imageUrls.length + (audioUrl ? 1 : 0));
@@ -609,26 +605,6 @@ function setupPageLoader(){
     downloadedBytes += Math.max(0, Number(sizeBytes) || 0);
     updateTargetProgress();
     setLoaderData(loadedResources, totalResources);
-  };
-
-  const estimateTotalResourceSize = ()=>{
-    if (!resourceUrls.length){
-      setLoaderData(loadedResources, totalResources);
-      return Promise.resolve();
-    }
-
-    return Promise.all(resourceUrls.map((url)=>
-      fetchWithTimeout(url, { method: 'HEAD', cache: 'force-cache' }, 8000)
-        .then((res)=>{
-          if (!res.ok) return 0;
-          const contentLength = Number(res.headers.get('content-length'));
-          return Number.isFinite(contentLength) && contentLength > 0 ? contentLength : 0;
-        })
-        .catch(()=> 0)
-    )).then((sizes)=>{
-      estimatedTotalBytes = sizes.reduce((sum, size)=> sum + size, 0);
-      setLoaderData(loadedResources, totalResources);
-    });
   };
 
   const fetchWithTimeout = (url, options = {}, timeoutMs = 20000)=>{
@@ -709,7 +685,7 @@ function setupPageLoader(){
     });
 
   targetPercent = 3;
-  setLoaderTitle('Sabar ya, lagi hitung ukuran resource...');
+  setLoaderTitle('Sabar ya, lagi download resource...');
   setLoaderData(loadedResources, totalResources);
   renderProgress();
 
@@ -751,7 +727,7 @@ function setupPageLoader(){
     });
   };
 
-  return estimateTotalResourceSize().catch(()=>{}).then(()=> loadAudioFirst()).then(()=> loadImages()).then(()=>{
+  return loadAudioFirst().then(()=> loadImages()).then(()=>{
     clearStuckHelpTimer();
     loadedResources = totalResources;
     setLoaderData(loadedResources, totalResources);
