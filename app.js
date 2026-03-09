@@ -490,9 +490,21 @@ function setupPhotoModal(){
 
 function setupPageLoader(){
   const loader = document.getElementById('pageLoader');
+  const loaderCard = loader && loader.querySelector('.loader-card');
   const loaderBar = document.getElementById('loaderBar');
   const loaderPercent = document.getElementById('loaderPercent');
   const loaderData = document.getElementById('loaderData');
+  const loaderHint = document.getElementById('loaderHint');
+  const loaderRefreshBtn = document.getElementById('loaderRefreshBtn');
+
+  if (loaderRefreshBtn){
+    loaderRefreshBtn.addEventListener('click', ()=>{
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set('refresh', Date.now().toString());
+      window.location.replace(nextUrl.toString());
+    });
+  }
+
   if (!loader || !loaderBar || !loaderPercent){
     document.body.classList.add('loaded');
     return Promise.resolve();
@@ -521,7 +533,8 @@ function setupPageLoader(){
   const setLoaderData = (loaded, total)=>{
     if (!loaderData) return;
     const downloadedLabel = formatBytes(downloadedBytes);
-    const estimatedLabel = estimatedTotalBytes > 0 ? ` / ${formatBytes(estimatedTotalBytes)}` : '';
+    const displayEstimatedTotal = Math.max(estimatedTotalBytes, downloadedBytes);
+    const estimatedLabel = displayEstimatedTotal > 0 ? ` / ${formatBytes(displayEstimatedTotal)} (estimasi)` : '';
     loaderData.textContent = `${loaded} / ${total} resource • ${downloadedLabel}${estimatedLabel}`;
   };
 
@@ -542,6 +555,33 @@ function setupPageLoader(){
   let loadedResources = 0;
   let targetPercent = 0;
   let displayedPercent = 0;
+  let stuckHelpTimer = null;
+  let stuckHelpShown = false;
+
+  const clearStuckHelpTimer = ()=>{
+    if (!stuckHelpTimer) return;
+    clearTimeout(stuckHelpTimer);
+    stuckHelpTimer = null;
+  };
+
+  const showStuckHelp = ()=>{
+    if (stuckHelpShown) return;
+    stuckHelpShown = true;
+    if (loaderCard) loaderCard.classList.add('is-stuck');
+    if (loaderHint) loaderHint.hidden = false;
+    if (loaderRefreshBtn) loaderRefreshBtn.hidden = false;
+  };
+
+  const maybeScheduleStuckHelp = ()=>{
+    if (targetPercent < 100 || stuckHelpShown || stuckHelpTimer) return;
+    stuckHelpTimer = setTimeout(()=>{
+      stuckHelpTimer = null;
+      if (document.body.classList.contains('loaded')) return;
+      if (targetPercent >= 100 && loader && !loader.classList.contains('is-done')){
+        showStuckHelp();
+      }
+    }, 5000);
+  };
 
   const renderProgress = ()=>{
     loaderBar.style.width = `${displayedPercent}%`;
@@ -552,6 +592,9 @@ function setupPageLoader(){
     if (displayedPercent < targetPercent){
       displayedPercent += 1;
       renderProgress();
+    }
+    if (displayedPercent >= 100 || targetPercent >= 100){
+      maybeScheduleStuckHelp();
     }
   }, 15);
 
@@ -703,6 +746,7 @@ function setupPageLoader(){
   };
 
   return estimateTotalResourceSize().catch(()=>{}).then(()=> loadAudioFirst()).then(()=> loadImages()).then(()=>{
+    clearStuckHelpTimer();
     loadedResources = totalResources;
     setLoaderData(loadedResources, totalResources);
     targetPercent = 100;
@@ -719,6 +763,7 @@ function setupPageLoader(){
       }, 280);
     });
   }).catch(()=>{
+    clearStuckHelpTimer();
     clearInterval(animateProgressTimer);
     targetPercent = 100;
     displayedPercent = 100;
